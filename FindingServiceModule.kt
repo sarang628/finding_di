@@ -5,10 +5,10 @@ import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.usecase.FindRestaurantUseCase
 import com.example.screen_finding.usecase.SearchThisAreaUseCase
 import com.example.screen_finding.viewmodel.Filter
-import com.sryang.torang_repository.api.ApiRestaurant
-import com.sryang.torang_repository.api.handle
-import com.sryang.torang_repository.data.SearchType
-import com.sryang.torang_repository.repository.MapRepository
+import com.sarang.torang.api.ApiRestaurant
+import com.sarang.torang.api.handle
+import com.sarang.torang.data.SearchType
+import com.sarang.torang.repository.MapRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
