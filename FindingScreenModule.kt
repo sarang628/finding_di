@@ -40,8 +40,9 @@ fun Finding(
         errorMessage = uiState.errorMessage,
         consumeErrorMessage = { findingViewModel.clearErrorMessage() },
         restaurantCardPage = {
+            Log.d("__sryang", "selectedRestaurant : ${uiState.selectedRestaurant}")
             RestaurantCardPage(
-                restaurants = uiState.restaurants.map { it.toRestaurantCardData() },
+                restaurants = uiState.restaurants?.map { it.toRestaurantCardData() },
                 restaurantImageServerUrl = "http://sarang628.iptime.org:89/restaurant_images/",
                 onChangePage = { page -> findingViewModel.selectPage(page) },
                 onClickCard = { navController.navigate("restaurant/$it") },
@@ -57,7 +58,7 @@ fun Finding(
                         findingViewModel.selectMarker(it)
                     },
                     cameraPositionState = cameraPositionState,
-                    list = uiState.restaurants.map { it.toMarkData() },
+                    list = uiState.restaurants?.map { it.toMarkData() },
                     selectedMarkerData = uiState.selectedRestaurant?.toMarkData(),
                     onMapClick = {
                         isVisible = !isVisible
@@ -109,13 +110,14 @@ fun Finding(
                 findingViewModel.setCurrentLocation(it)
                 coroutineScope.launch {
                     cameraPositionState.animate(
-                        update = CameraUpdateFactory.newLatLng(
+                        update = CameraUpdateFactory.newLatLngZoom(
                             LatLng(
                                 it.latitude,
                                 it.longitude
-                            )
+                            ),
+                            if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom
                         ),
-                        300
+                        if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300
                     )
                 }
                 myLocation = LatLng(it.latitude, it.longitude)

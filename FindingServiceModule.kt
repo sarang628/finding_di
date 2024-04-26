@@ -27,9 +27,13 @@ class FindingServiceModule {
             }
 
             override suspend fun filter(filter: Filter): List<RestaurantInfo> {
-                return apiRestaurant.getFilterRestaurant(
-                    filter = filter.toFilter()
-                ).map { it.toRestaurantInfo() }
+                try {
+                    return apiRestaurant.getFilterRestaurant(
+                        filter = filter.toFilter()
+                    ).map { it.toRestaurantInfo() }
+                }catch (e: HttpException){
+                    throw Exception(e.handle())
+                }
             }
         }
     }
