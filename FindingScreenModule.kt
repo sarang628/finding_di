@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.cardinfo.RestaurantCardPage
@@ -27,7 +28,8 @@ import kotlinx.coroutines.launch
 fun Finding(
     findingViewModel: FindingViewModel = hiltViewModel(),
     filterViewModel: FilterViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
+    positionColor: Color? = null
 ) {
     val uiState by findingViewModel.uiState.collectAsState()
     val filterUiState by filterViewModel.uiState.collectAsState()
@@ -47,7 +49,19 @@ fun Finding(
                 onChangePage = { page -> findingViewModel.selectPage(page) },
                 onClickCard = { navController.navigate("restaurant/$it") },
                 focusedRestaurant = uiState.selectedRestaurant?.toRestaurantCardData(),
-                visible = isVisible
+                visible = isVisible,
+                onPosition = {
+                    findingViewModel.findPositionByRestaurantId(it)?.let {
+                        coroutineScope.launch {
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newLatLng(
+                                    LatLng(it.lat, it.lon)
+                                ), 300
+                            )
+                        }
+                    }
+                },
+                positionColor = positionColor
             )
         },
         mapScreen = {
