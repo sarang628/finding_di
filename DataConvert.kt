@@ -74,7 +74,7 @@ fun RemoteRestaurant.toRestaurantInfo(): RestaurantInfo {
         restaurantId = this.restaurantId,
         restaurantName = this.restaurantName,
         rating = this.rating,
-        foodType = this.restaurantType,
+        foodType = this.restaurantTypeCd,
         restaurantImage = this.imgUrl1,
         price = "$$$",
         distance = "120m",
