@@ -42,7 +42,6 @@ fun Finding(
         errorMessage = uiState.errorMessage,
         consumeErrorMessage = { findingViewModel.clearErrorMessage() },
         restaurantCardPage = {
-            Log.d("__sryang", "selectedRestaurant : ${uiState.selectedRestaurant}")
             RestaurantCardPage(
                 restaurants = uiState.restaurants?.map { it.toRestaurantCardData() },
                 restaurantImageServerUrl = "http://sarang628.iptime.org:89/restaurant_images/",
