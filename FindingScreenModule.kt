@@ -20,6 +20,7 @@ import com.example.screen_map.compose.MapScreen
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sryang.screen_filter.ui.FilterScreen
 import com.sryang.screen_filter.ui.FilterViewModel
 import kotlinx.coroutines.launch
@@ -116,7 +117,9 @@ fun Finding(
                             1000
                         )
                     }
-                })
+                },
+                image = provideTorangAsyncImage()
+            )
         },
         myLocation = {
             CurrentLocationScreen(onLocation = {
