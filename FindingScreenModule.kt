@@ -16,7 +16,7 @@ import com.example.cardinfo.RestaurantCardPage
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindingViewModel
 import com.example.screen_map.compose.CurrentLocationScreen
-import com.example.screen_map.compose.MapScreen
+import com.example.screen_map.compose.MapScreenForFinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -66,7 +66,7 @@ fun Finding(
         },
         mapScreen = {
             Box {
-                MapScreen(
+                MapScreenForFinding(
                     onMark = {
                         isVisible = true
                         findingViewModel.selectMarker(it)
