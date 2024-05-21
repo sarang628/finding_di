@@ -30,7 +30,7 @@ fun Finding(
     findingViewModel: FindingViewModel = hiltViewModel(),
     filterViewModel: FilterViewModel = hiltViewModel(),
     navController: NavHostController,
-    positionColor: Color? = null
+    positionColor: Color? = null,
 ) {
     val uiState by findingViewModel.uiState.collectAsState()
     val filterUiState by filterViewModel.uiState.collectAsState()
@@ -118,7 +118,10 @@ fun Finding(
                         )
                     }
                 },
-                image = provideTorangAsyncImage()
+                image = provideTorangAsyncImage(),
+                onSearch = {
+                    findingViewModel.onSearch(it.toFilter())
+                }
             )
         },
         myLocation = {

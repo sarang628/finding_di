@@ -3,6 +3,7 @@ package com.sryang.findinglinkmodules.di.finding_di
 import android.location.Location
 import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.usecase.FindRestaurantUseCase
+import com.example.screen_finding.usecase.SearchByKeywordUseCase
 import com.example.screen_finding.usecase.SearchThisAreaUseCase
 import com.example.screen_finding.viewmodel.Filter
 import com.sarang.torang.api.ApiRestaurant
@@ -31,7 +32,7 @@ class FindingServiceModule {
                     return apiRestaurant.getFilterRestaurant(
                         filter = filter.toFilter()
                     ).map { it.toRestaurantInfo() }
-                }catch (e: HttpException){
+                } catch (e: HttpException) {
                     throw Exception(e.handle())
                 }
             }
@@ -41,7 +42,7 @@ class FindingServiceModule {
     @Provides
     fun provideSearchThisAreaModule(
         apiRestaurant: ApiRestaurant,
-        mapRepository: MapRepository
+        mapRepository: MapRepository,
     ): SearchThisAreaUseCase {
         return object : SearchThisAreaUseCase {
             override suspend fun invoke(filter: Filter): List<RestaurantInfo> {
@@ -56,13 +57,41 @@ class FindingServiceModule {
                     return apiRestaurant.getFilterRestaurant(
                         filter = filter
                     ).map { it.toRestaurantInfo() }
-                }catch (e: HttpException){
+                } catch (e: HttpException) {
                     throw Exception(e.handle())
                 }
 
             }
         }
     }
+
+    @Provides
+    fun provideSearchByKeywordModule(
+        apiRestaurant: ApiRestaurant,
+        mapRepository: MapRepository,
+    ): SearchByKeywordUseCase {
+        return object : SearchByKeywordUseCase {
+            override suspend fun invoke(filter: Filter): List<RestaurantInfo> {
+
+                val filter = filter.toFilter()
+                filter.north = mapRepository.getNElon()
+                filter.east = mapRepository.getNElat()
+                filter.south = mapRepository.getSWlon()
+                filter.west = mapRepository.getSWlat()
+                filter.searchType = SearchType.BOUND
+                filter.keyword = filter.keyword
+                try {
+                    return apiRestaurant.getFilterRestaurant(
+                        filter = filter
+                    ).map { it.toRestaurantInfo() }
+                } catch (e: HttpException) {
+                    throw Exception(e.handle())
+                }
+
+            }
+        }
+    }
+
 }
 
 private fun newLocation(): Location {

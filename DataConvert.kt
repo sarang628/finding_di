@@ -34,7 +34,8 @@ fun Filter.toFilter(): com.sarang.torang.data.Filter {
         north = this.north,
         south = this.south,
         east = this.east,
-        west = this.west
+        west = this.west,
+        keyword = keyword
     )
 }
 
@@ -111,6 +112,7 @@ fun FilterUiState.toFilter(): Filter {
         restaurantTypes = if (this.foodType.isEmpty()) null else foodType,
         prices = if (price.isEmpty()) null else price,
         ratings = if (rating.isEmpty()) null else rating,
-        distances = distance
+        distances = distance,
+        keyword = keyword
     )
 }
