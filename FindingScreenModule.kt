@@ -11,7 +11,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.example.cardinfo.RestaurantCardPage
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindingViewModel
