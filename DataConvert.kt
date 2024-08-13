@@ -4,8 +4,8 @@ import com.example.cardinfo.RestaurantCardData
 import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData
+import com.sarang.torang.data.remote.response.RestaurantApiModel
 import com.sryang.screen_filter.ui.FilterUiState
-import com.sarang.torang.data.remote.response.RemoteRestaurant
 
 
 fun String.toBoundary(): Double {
@@ -70,7 +70,7 @@ fun List<String>.toRating(): List<String>? {
     }.toList()
 }
 
-fun RemoteRestaurant.toRestaurantInfo(): RestaurantInfo {
+fun RestaurantApiModel.toRestaurantInfo(): RestaurantInfo {
     return RestaurantInfo(
         restaurantId = this.restaurantId,
         restaurantName = this.restaurantName,
