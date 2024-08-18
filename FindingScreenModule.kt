@@ -11,7 +11,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import com.example.cardinfo.RestaurantCardPage
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindingViewModel
@@ -20,6 +19,7 @@ import com.example.screen_map.compose.MapScreenForFinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.sarang.torang.RootNavController
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sryang.screen_filter.ui.FilterScreen
 import com.sryang.screen_filter.ui.FilterViewModel
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 fun Finding(
     findingViewModel: FindingViewModel = hiltViewModel(),
     filterViewModel: FilterViewModel = hiltViewModel(),
-    navController: NavHostController,
+    navController: RootNavController,
     positionColor: Color? = null,
 ) {
     val uiState by findingViewModel.uiState.collectAsState()
@@ -47,7 +47,7 @@ fun Finding(
                 restaurants = uiState.restaurants?.map { it.toRestaurantCardData() },
                 restaurantImageServerUrl = "http://sarang628.iptime.org:89/restaurant_images/",
                 onChangePage = { page -> findingViewModel.selectPage(page) },
-                onClickCard = { navController.navigate("restaurant/$it") },
+                onClickCard = { navController.restaurant(it) },
                 focusedRestaurant = uiState.selectedRestaurant?.toRestaurantCardData(),
                 visible = isVisible,
                 onPosition = {
