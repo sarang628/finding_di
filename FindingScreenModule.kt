@@ -33,7 +33,7 @@ fun Finding(
     positionColor: Color? = null,
 ) {
     val uiState by findingViewModel.uiState.collectAsState()
-    val filterUiState by filterViewModel.uiState.collectAsState()
+    val filterUiState = filterViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
     var isVisible by remember { mutableStateOf(true) }
@@ -106,6 +106,19 @@ fun Finding(
                     findingViewModel.findThisArea(it.toFilter())
                 },
                 onNation = {
+                    coroutineScope.launch {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                    it.latitude,
+                                    it.longitude
+                                ), it.zoom
+                            ),
+                            1000
+                        )
+                    }
+                },
+                onCity = {
                     coroutineScope.launch {
                         cameraPositionState.animate(
                             CameraUpdateFactory.newLatLngZoom(

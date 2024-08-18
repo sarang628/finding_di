@@ -5,7 +5,7 @@ import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData
 import com.sryang.screen_filter.ui.FilterUiState
-import com.sarang.torang.data.remote.response.RemoteRestaurant
+import com.sarang.torang.data.remote.response.RestaurantApiModel
 
 
 fun String.toBoundary(): Double {
@@ -54,7 +54,7 @@ fun String.toDistnace(): String? {
 }
 
 fun List<String>.toRating(): List<String>? {
-    return this.stream().map {
+    return this.map {
         if (it == "*")
             "ONE"
         else if (it == "**")
@@ -70,7 +70,7 @@ fun List<String>.toRating(): List<String>? {
     }.toList()
 }
 
-fun RemoteRestaurant.toRestaurantInfo(): RestaurantInfo {
+fun RestaurantApiModel.toRestaurantInfo(): RestaurantInfo {
     return RestaurantInfo(
         restaurantId = this.restaurantId,
         restaurantName = this.restaurantName,
