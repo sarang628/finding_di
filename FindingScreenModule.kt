@@ -1,4 +1,4 @@
-package com.sryang.findinglinkmodules.di.finding_di
+package com.sarang.torang.di.finding_di
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -9,7 +9,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cardinfo.RestaurantCardPage
 import com.example.screen_finding.ui.FindScreen
@@ -21,17 +20,18 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
 import com.sarang.torang.di.image.provideTorangAsyncImage
+import com.sryang.findinglinkmodules.di.finding_di.toBoundary
+import com.sryang.findinglinkmodules.di.finding_di.toFilter
+import com.sryang.findinglinkmodules.di.finding_di.toMarkData
+import com.sryang.findinglinkmodules.di.finding_di.toRestaurantCardData
 import com.sryang.screen_filter.ui.FilterScreen
 import com.sryang.screen_filter.ui.FilterViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun Finding(
-    findingViewModel: FindingViewModel = hiltViewModel(),
-    filterViewModel: FilterViewModel = hiltViewModel(),
-    navController: RootNavController,
-    positionColor: Color? = null,
-) {
+fun Finding(navController: RootNavController) {
+    val findingViewModel: FindingViewModel = hiltViewModel()
+    val filterViewModel: FilterViewModel = hiltViewModel()
     val uiState by findingViewModel.uiState.collectAsState()
     val filterUiState = filterViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
@@ -60,8 +60,7 @@ fun Finding(
                             )
                         }
                     }
-                },
-                positionColor = positionColor
+                }
             )
         },
         mapScreen = {
@@ -94,7 +93,8 @@ fun Finding(
             }
         },
         filter = {
-            FilterScreen(filterViewModel = filterViewModel,
+            FilterScreen(
+                filterViewModel = filterViewModel,
                 onFilter = {
                     val filter = it.toFilter()
                     filter.lat = myLocation?.latitude
