@@ -131,10 +131,7 @@ fun Finding(navController: RootNavController) {
                         )
                     }
                 },
-                image = { a, b, c, d, e ->
-                    provideTorangAsyncImage()
-                        .invoke(a, b, c, d, e, null)
-                },
+                image = provideTorangAsyncImage(),
                 onSearch = {
                     findingViewModel.onSearch(it.toFilter())
                 }
