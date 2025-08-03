@@ -26,12 +26,7 @@ import com.sryang.screen_filter.ui.FilterViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun Finding(
-    findingViewModel: FindingViewModel = hiltViewModel(),
-    filterViewModel: FilterViewModel = hiltViewModel(),
-    navController: RootNavController,
-    positionColor: Color? = null,
-) {
+fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
     val uiState by findingViewModel.uiState.collectAsState()
     val filterUiState = filterViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
@@ -45,113 +40,41 @@ fun Finding(
         restaurantCardPage = {
             RestaurantCardPage(
                 restaurants = uiState.restaurants?.map { it.toRestaurantCardData() },
-                restaurantImageServerUrl = "http://sarang628.iptime.org:89/restaurant_images/",
                 onChangePage = { page -> findingViewModel.selectPage(page) },
                 onClickCard = { navController.restaurant(it) },
                 focusedRestaurant = uiState.selectedRestaurant?.toRestaurantCardData(),
                 visible = isVisible,
-                onPosition = {
-                    findingViewModel.findPositionByRestaurantId(it)?.let {
-                        coroutineScope.launch {
-                            cameraPositionState.animate(
-                                CameraUpdateFactory.newLatLng(
-                                    LatLng(it.lat, it.lon)
-                                ), 300
-                            )
-                        }
-                    }
-                },
-                positionColor = positionColor
+                onPosition = { findingViewModel.findPositionByRestaurantId(it)?.let { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(it.lat, it.lon)), 300) } } },
             )
         },
         mapScreen = {
-            Box {
-                MapScreenForFinding(
-                    onMark = {
-                        isVisible = true
-                        findingViewModel.selectMarker(it)
-                    },
-                    cameraPositionState = cameraPositionState,
-                    list = uiState.restaurants?.map { it.toMarkData() },
-                    selectedMarkerData = uiState.selectedRestaurant?.toMarkData(),
-                    onMapClick = {
-                        isVisible = !isVisible
-                        Log.d("Finding", "onMapClick $isVisible")
-                    },
-                    myLocation = myLocation,
-                    boundary = filterUiState.distance.toBoundary()
-                )
-            }
+            MapScreenForFinding(
+                onMark = { isVisible = true; findingViewModel.selectMarker(it) },
+                cameraPositionState = cameraPositionState,
+                list = uiState.restaurants?.map { it.toMarkData() },
+                selectedMarkerData = uiState.selectedRestaurant?.toMarkData(),
+                onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") },
+                myLocation = myLocation,
+                boundary = filterUiState.distance.toBoundary()
+            )
         },
-        onZoomIn = {
-            coroutineScope.launch {
-                cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300)
-            }
-        },
-        onZoomOut = {
-            coroutineScope.launch {
-                cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300)
-            }
-        },
+        onZoomIn = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) } },
+        onZoomOut = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) } },
         filter = {
             FilterScreen(filterViewModel = filterViewModel,
-                onFilter = {
-                    val filter = it.toFilter()
-                    filter.lat = myLocation?.latitude
-                    filter.lon = myLocation?.longitude
-                    findingViewModel.filter(filter)
-                },
+                onFilter = { val filter = it.toFilter(); filter.lat = myLocation?.latitude; filter.lon = myLocation?.longitude; findingViewModel.filter(filter) },
                 visible = isVisible,
-                onThisArea = {
-                    findingViewModel.findThisArea(it.toFilter())
-                },
-                onNation = {
-                    coroutineScope.launch {
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(
-                                    it.latitude,
-                                    it.longitude
-                                ), it.zoom
-                            ),
-                            1000
-                        )
-                    }
-                },
-                onCity = {
-                    coroutineScope.launch {
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngZoom(
-                                LatLng(
-                                    it.latitude,
-                                    it.longitude
-                                ), it.zoom
-                            ),
-                            1000
-                        )
-                    }
-                },
+                onThisArea = { findingViewModel.findThisArea(it.toFilter()) },
+                onNation = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), it.zoom), 1000) } },
+                onCity = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), it.zoom), 1000) } },
                 image = provideTorangAsyncImage(),
-                onSearch = {
-                    findingViewModel.onSearch(it.toFilter())
-                }
+                onSearch = { findingViewModel.onSearch(it.toFilter()) }
             )
         },
         myLocation = {
             CurrentLocationScreen(onLocation = {
                 findingViewModel.setCurrentLocation(it)
-                coroutineScope.launch {
-                    cameraPositionState.animate(
-                        update = CameraUpdateFactory.newLatLngZoom(
-                            LatLng(
-                                it.latitude,
-                                it.longitude
-                            ),
-                            if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom
-                        ),
-                        if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300
-                    )
-                }
+                coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
                 myLocation = LatLng(it.latitude, it.longitude)
             }
             )
