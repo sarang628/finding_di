@@ -1,6 +1,6 @@
 package com.sryang.findinglinkmodules.di.finding_di
 
-import com.example.cardinfo.RestaurantCardData
+import com.sarang.torang.compose.cardinfo.RestaurantCardData
 import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData

@@ -1,7 +1,7 @@
 package com.sryang.findinglinkmodules.di.finding_di
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -9,9 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.cardinfo.RestaurantCardPage
+import com.sarang.torang.compose.cardinfo.RestaurantCardPage
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindingViewModel
 import com.example.screen_map.compose.CurrentLocationScreen
@@ -20,6 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
+import com.sarang.torang.compose.cardinfo.RestaurantCard
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sryang.screen_filter.ui.FilterScreen
 import com.sryang.screen_filter.ui.FilterViewModel
@@ -38,14 +38,17 @@ fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewMode
         errorMessage = uiState.errorMessage,
         consumeErrorMessage = { findingViewModel.clearErrorMessage() },
         restaurantCardPage = {
-            RestaurantCardPage(
-                restaurants = uiState.restaurants?.map { it.toRestaurantCardData() },
-                onChangePage = { page -> findingViewModel.selectPage(page) },
-                onClickCard = { navController.restaurant(it) },
-                focusedRestaurant = uiState.selectedRestaurant?.toRestaurantCardData(),
-                visible = isVisible,
-                onPosition = { findingViewModel.findPositionByRestaurantId(it)?.let { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(it.lat, it.lon)), 300) } } },
-            )
+            Column {
+                //RestaurantCardPage()
+                RestaurantCardPage(
+                    restaurants = uiState.restaurants.map { it.toRestaurantCardData() },
+                    onChangePage = { page -> findingViewModel.selectPage(page) },
+                    onClickCard = { navController.restaurant(it) },
+                    focusedRestaurant = uiState.selectedRestaurant?.toRestaurantCardData(),
+                    visible = isVisible,
+                    onPosition = { findingViewModel.findPositionByRestaurantId(it)?.let { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(it.lat, it.lon)), 300) } } },
+                )
+            }
         },
         mapScreen = {
             MapScreenForFinding(
