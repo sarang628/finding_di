@@ -1,4 +1,4 @@
-package com.sryang.findinglinkmodules.di.finding_di
+package com.sarang.torang.di.finding_di
 
 import android.location.Location
 import com.example.screen_finding.data.RestaurantInfo
