@@ -5,7 +5,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,11 +42,18 @@ fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewMode
     var isVisible by remember { mutableStateOf(true) }
     var myLocation: LatLng? by remember { mutableStateOf(null) }
 
-    Scaffold {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = uiState.errorMessage, block = {
+        uiState.errorMessage?.let {
+            snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
+            findingViewModel.clearErrorMessage()
+        }
+    })
+
+    Scaffold(snackbarHost = {SnackbarHost(hostState = snackbarHostState)}) {
         Box(modifier = Modifier.padding(it).padding(top = 0.dp, bottom = 30.dp)){
             FindScreen(
-                errorMessage = uiState.errorMessage,
-                consumeErrorMessage = { findingViewModel.clearErrorMessage() },
                 restaurantCardPage = {
                     Column {
                         //RestaurantCardPage()
