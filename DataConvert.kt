@@ -5,8 +5,8 @@ import com.example.cardinfo.RestaurantCardData
 import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData
-import com.sryang.screen_filter.ui.FilterUiState
 import com.sarang.torang.data.remote.response.RestaurantApiModel
+import com.sarang.torang.ui.FilterUiState
 
 
 fun String.toBoundary(): Double {
@@ -26,7 +26,7 @@ fun String.toBoundary(): Double {
 
 fun Filter.toFilter(): com.sarang.torang.data.Filter {
     return com.sarang.torang.data.Filter(
-        restaurantTypes = this.restaurantTypes?.stream()?.map { it.uppercase() }?.toList(),
+        restaurantTypes = this.restaurantTypes?.map { it.uppercase() }?.toList(),
         prices = this.prices,
         ratings = this.ratings?.toRating(),
         distances = this.distances?.toDistnace(),

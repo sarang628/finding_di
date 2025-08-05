@@ -29,8 +29,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
 import com.sarang.torang.di.image.provideTorangAsyncImage
-import com.sryang.screen_filter.ui.FilterScreen
-import com.sryang.screen_filter.ui.FilterViewModel
+import com.sarang.torang.ui.FilterScreen
+import com.sarang.torang.ui.FilterViewModel
 import kotlinx.coroutines.launch
 
 @Composable
