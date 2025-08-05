@@ -51,8 +51,8 @@ fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewMode
         }
     })
 
-    Scaffold(snackbarHost = {SnackbarHost(hostState = snackbarHostState)}) {
-        Box(modifier = Modifier.padding(it).padding(top = 0.dp, bottom = 30.dp)){
+    //Scaffold(snackbarHost = {SnackbarHost(hostState = snackbarHostState)}) {
+        Box {
             FindScreen(
                 restaurantCardPage = {
                     Column {
@@ -102,5 +102,5 @@ fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewMode
                 }
             )
         }
-    }
+    //}
 }
