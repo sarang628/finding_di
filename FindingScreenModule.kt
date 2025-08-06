@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Finding(findingViewModel: FindingViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
-    val uiState by findingViewModel.uiState.collectAsState()
+    val uiState = findingViewModel.uiState
     val filterUiState = filterViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
