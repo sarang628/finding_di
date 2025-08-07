@@ -9,6 +9,7 @@ import com.example.screen_finding.viewmodel.Filter
 import com.sarang.torang.api.ApiRestaurant
 import com.sarang.torang.api.handle
 import com.sarang.torang.data.SearchType
+import com.sarang.torang.repository.FindRepository
 import com.sarang.torang.repository.MapRepository
 import dagger.Module
 import dagger.Provides
@@ -41,11 +42,11 @@ class FindingServiceModule {
 
     @Provides
     fun provideSearchThisAreaModule(
-        apiRestaurant: ApiRestaurant,
         mapRepository: MapRepository,
+        findRepository: FindRepository
     ): SearchThisAreaUseCase {
         return object : SearchThisAreaUseCase {
-            override suspend fun invoke(filter: Filter): List<RestaurantInfo> {
+            override suspend fun invoke(filter: Filter){
 
                 val filter = filter.toFilter()
                 filter.north = mapRepository.getNElon()
@@ -54,9 +55,7 @@ class FindingServiceModule {
                 filter.west = mapRepository.getSWlat()
                 filter.searchType = SearchType.BOUND
                 try {
-                    return apiRestaurant.getFilterRestaurant(
-                        filter = filter
-                    ).map { it.toRestaurantInfo() }
+                    findRepository.search(filter)
                 } catch (e: HttpException) {
                     throw Exception(e.handle())
                 }
@@ -69,6 +68,7 @@ class FindingServiceModule {
     fun provideSearchByKeywordModule(
         apiRestaurant: ApiRestaurant,
         mapRepository: MapRepository,
+        findRepository: FindRepository
     ): SearchByKeywordUseCase {
         return object : SearchByKeywordUseCase {
             override suspend fun invoke(filter: Filter): List<RestaurantInfo> {
@@ -81,6 +81,7 @@ class FindingServiceModule {
                 filter.searchType = SearchType.BOUND
                 filter.keyword = filter.keyword
                 try {
+                    findRepository.search(filter)
                     return apiRestaurant.getFilterRestaurant(
                         filter = filter
                     ).map { it.toRestaurantInfo() }
