@@ -22,17 +22,26 @@ import retrofit2.HttpException
 @Module
 class FindingServiceModule {
     @Provides
-    fun provideFindingService(apiRestaurant: ApiRestaurant): FindRestaurantUseCase {
+    fun provideFindingService(findRepository: FindRepository): FindRestaurantUseCase {
         return object : FindRestaurantUseCase {
-            override suspend fun findRestaurants(): List<RestaurantInfo> {
-                return apiRestaurant.getAllRestaurant().map { it.toRestaurantInfo() }
-            }
-
-            override suspend fun filter(filter: Filter): List<RestaurantInfo> {
+            override suspend fun filter(filter: Filter) {
                 try {
-                    return apiRestaurant.getFilterRestaurant(
-                        filter = filter.toFilter()
-                    ).map { it.toRestaurantInfo() }
+                    val filter1 = com.sarang.torang.data.Filter();
+                    filter1.keyword = filter.keyword
+                    filter1.east = filter.east
+                    filter1.west = filter.west
+                    filter1.south = filter.south
+                    filter1.north = filter.north
+                    filter1.lat = filter.lat
+                    filter1.lon = filter.lon
+                    filter1.distances = filter.distances
+                    if(filter.distances == "")
+                        filter1.distances = null
+                    filter1.searchType = SearchType.valueOf(filter.searchType)
+                    filter1.restaurantTypes = filter.restaurantTypes
+                    filter1.ratings = filter.ratings
+                    filter1.prices = filter.prices
+                    findRepository.search(filter1)
                 } catch (e: HttpException) {
                     throw Exception(e.handle())
                 }
