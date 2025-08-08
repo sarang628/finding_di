@@ -24,6 +24,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
 import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
+import com.sarang.torang.compose.cardinfo.RestaurantCardPage
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.ui.FilterScreen
@@ -50,7 +51,7 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
         FindScreen(
             restaurantCardPage = {
                 CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
-                    RestaurantCardPage1(onClickCard = { navController.restaurant(it) }, visible = isVisible)
+                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible)
                 }
             },
             mapScreen = {

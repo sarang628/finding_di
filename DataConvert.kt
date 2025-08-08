@@ -4,8 +4,8 @@ import com.example.screen_finding.data.RestaurantInfo
 import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData
 import com.sarang.torang.BuildConfig
-import com.sarang.torang.compose.cardinfo.RestaurantCardData
-import com.sarang.torang.data.remote.response.RestaurantApiModel
+import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
+import com.sarang.torang.data.remote.response.RestaurantResponseDto
 import com.sarang.torang.ui.FilterUiState
 
 
@@ -57,22 +57,22 @@ fun List<String>.toRating(): List<String>? {
     }.toList()
 }
 
-fun RestaurantApiModel.toRestaurantInfo(): RestaurantInfo {
+fun RestaurantResponseDto.toRestaurantInfo(): RestaurantInfo {
     return RestaurantInfo(
-        restaurantId = this.restaurantId,
-        restaurantName = this.restaurantName,
-        rating = this.rating,
-        foodType = this.restaurantTypeCd,
+        restaurantId = this.restaurantId ?: -1,
+        restaurantName = this.restaurantName ?: "",
+        rating = this.rating ?: 0f,
+        foodType = this.restaurantTypeCd ?: "",
         restaurantImage = BuildConfig.RESTAURANT_IMAGE_SERVER_URL + this.imgUrl1,
         price = "$$$",
         distance = "120m",
-        lat = this.lat,
-        lon = this.lon,
+        lat = this.lat ?: 0.0,
+        lon = this.lon ?: 0.0,
     )
 }
 
-fun RestaurantInfo.toRestaurantCardData(): RestaurantCardData {
-    return RestaurantCardData(
+fun RestaurantInfo.toRestaurantCardData(): RestaurantCardUIState {
+    return RestaurantCardUIState(
         restaurantId = this.restaurantId,
         restaurantName = this.restaurantName,
         rating = this.rating,
