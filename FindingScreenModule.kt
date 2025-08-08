@@ -55,7 +55,7 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
                 }
             },
             mapScreen = {
-                MapScreenForFinding(cameraPositionState = cameraPositionState, selectedMarkerData = uiState.selectedRestaurant?.toMarkData(), onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation)
+                MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation)
             },
             onZoomIn = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) } },
             onZoomOut = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) } },
