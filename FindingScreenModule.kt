@@ -42,6 +42,7 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     var isVisible by remember { mutableStateOf(true) }
     var myLocation: LatLng? by remember { mutableStateOf(null) }
     val snackBarHostState = remember { SnackbarHostState() }
+    val tag = "__Finding"
 
     LaunchedEffect(key1 = uiState.errorMessage, block = { // error snack bar
         uiState.errorMessage?.let {
