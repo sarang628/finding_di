@@ -35,8 +35,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
-    val uiState = findingViewModel.uiState
+fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
+    val uiState = findViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
     var isVisible by remember { mutableStateOf(true) }
@@ -46,7 +46,7 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
     LaunchedEffect(key1 = uiState.errorMessage, block = {
         uiState.errorMessage?.let {
             snackBarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
-            findingViewModel.clearErrorMessage()
+            findViewModel.clearErrorMessage()
         }
     })
 
@@ -74,7 +74,7 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
             },
             myLocation = {
                 CurrentLocationScreen(onLocation = {
-                    findingViewModel.setCurrentLocation(it)
+                    findViewModel.setCurrentLocation(it)
                     coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
                     myLocation = LatLng(it.latitude, it.longitude)
                 })
