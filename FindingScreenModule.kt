@@ -2,6 +2,9 @@ package com.sarang.torang.di.finding_di
 
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -12,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindViewModel
@@ -53,10 +58,12 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     Box {
         FindScreen(
             restaurantCardPage = {
-                CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
-                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
-                        onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
-                            moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
+                Column {
+                    CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
+                        RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
+                            onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
+                                moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
+                    }
                 }
             },
             mapScreen = {
@@ -78,7 +85,8 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                     coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
                     myLocation = LatLng(it.latitude, it.longitude)
                 })
-            }
+            },
+            buttonBottomPadding = 0.dp
         )
     }
 }
