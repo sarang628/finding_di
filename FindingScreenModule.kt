@@ -27,7 +27,6 @@ import com.sarang.torang.compose.LocalFilterImageLoader
 import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage
-import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.ui.FilterScreen
 import com.sarang.torang.ui.FilterViewModel
