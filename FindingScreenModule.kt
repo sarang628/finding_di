@@ -22,6 +22,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
+import com.sarang.torang.compose.FilterImageLoader
+import com.sarang.torang.compose.LocalFilterImageLoader
 import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage
@@ -29,6 +31,7 @@ import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.ui.FilterScreen
 import com.sarang.torang.ui.FilterViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -80,8 +83,6 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
     }
 }
 
-suspend fun moveCamera(cameraPositionState : CameraPositionState, latitude : Double, longitude : Double, zoom : Float){
-    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom), 1000)
 fun zoomIn(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){
     coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) }
 }
