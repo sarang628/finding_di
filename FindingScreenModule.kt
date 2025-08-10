@@ -64,6 +64,12 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
                     visible = isVisible,
                     onNation = { coroutineScope.launch { moveCamera(cameraPositionState, it.latitude, it.longitude, it.zoom) } },
                     onCity = { coroutineScope.launch { moveCamera(cameraPositionState, it.latitude, it.longitude, it.zoom)} },)
+                CompositionLocalProvider(LocalFilterImageLoader provides filterImageLoader) {
+                    FilterScreen(filterViewModel = filterViewModel,
+                        visible = isVisible,
+                        onNation = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                        onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} )
+                }
             },
             myLocation = {
                 CurrentLocationScreen(onLocation = {
@@ -84,6 +90,11 @@ fun moveCamera1(){
 }
 
 val customImageLoader: CardInfoImageLoader = { modifier, url, width, height, scale ->
+    // 여기서 실제 이미지 로딩 구현 예시
+    provideTorangAsyncImage().invoke(modifier, url, width, height, scale)
+}
+
+val filterImageLoader: FilterImageLoader = { modifier, url, width, height, scale ->
     // 여기서 실제 이미지 로딩 구현 예시
     provideTorangAsyncImage().invoke(modifier, url, width, height, scale)
 }
