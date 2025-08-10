@@ -51,19 +51,17 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
         FindScreen(
             restaurantCardPage = {
                 CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
-                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible)
+                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
+                        onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
+                            moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
                 }
             },
             mapScreen = {
                 MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation)
             },
-            onZoomIn = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) } },
-            onZoomOut = { coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) } },
+            onZoomIn = { zoomIn(coroutineScope, cameraPositionState) },
+            onZoomOut = { zoomOut(coroutineScope, cameraPositionState) },
             filter = {
-                FilterScreen(filterViewModel = filterViewModel,
-                    visible = isVisible,
-                    onNation = { coroutineScope.launch { moveCamera(cameraPositionState, it.latitude, it.longitude, it.zoom) } },
-                    onCity = { coroutineScope.launch { moveCamera(cameraPositionState, it.latitude, it.longitude, it.zoom)} },)
                 CompositionLocalProvider(LocalFilterImageLoader provides filterImageLoader) {
                     FilterScreen(filterViewModel = filterViewModel,
                         visible = isVisible,
@@ -84,9 +82,23 @@ fun Finding(findingViewModel: FindViewModel = hiltViewModel(), filterViewModel: 
 
 suspend fun moveCamera(cameraPositionState : CameraPositionState, latitude : Double, longitude : Double, zoom : Float){
     cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom), 1000)
+fun zoomIn(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){
+    coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) }
 }
-fun moveCamera1(){
-    //cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(it.lat, it.lon)), 300)
+
+fun zoomOut(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){
+    coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) }
+}
+
+fun moveCamera(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, latitude : Double, longitude : Double, zoom : Float){
+    coroutineScope.launch {
+        cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom), 1000)
+    }
+}
+fun moveCamera1(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, lat : Double, lon : Double){
+    coroutineScope.launch {
+        cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(lat, lon)), 300)
+    }
 }
 
 val customImageLoader: CardInfoImageLoader = { modifier, url, width, height, scale ->
