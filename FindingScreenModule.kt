@@ -43,7 +43,7 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     var myLocation: LatLng? by remember { mutableStateOf(null) }
     val snackBarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(key1 = uiState.errorMessage, block = {
+    LaunchedEffect(key1 = uiState.errorMessage, block = { // error snack bar
         uiState.errorMessage?.let {
             snackBarHostState.showSnackbar(it, duration = SnackbarDuration.Short)
             findViewModel.clearErrorMessage()
