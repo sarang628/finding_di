@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_finding.ui.FindScreen
@@ -38,6 +40,7 @@ import com.sarang.torang.ui.FilterScreen
 import com.sarang.torang.ui.FilterViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
@@ -48,6 +51,8 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     var myLocation: LatLng? by remember { mutableStateOf(null) }
     val snackBarHostState = remember { SnackbarHostState() }
     val tag = "__Finding"
+    var cardPagerHeight : Int by remember { mutableIntStateOf(0) }
+    val cardPagerHeightDp = with(LocalDensity.current) { cardPagerHeight.toDp() }
 
     LaunchedEffect(key1 = uiState.errorMessage, block = { // error snack bar
         uiState.errorMessage?.let {
@@ -68,7 +73,7 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                 }
             },
             mapScreen = {
-                MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation)
+                MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation, logoBottomPadding = cardPagerHeightDp)
             },
             onZoomIn = { zoomIn(coroutineScope, cameraPositionState) },
             onZoomOut = { zoomOut(coroutineScope, cameraPositionState) },
@@ -89,7 +94,8 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                     AssistChip(it, label = { Icon(Icons.Default.LocationOn, "") })
                 })
             },
-            buttonBottomPadding = 0.dp
+            buttonBottomPadding = 0.dp,
+            onChangeRestaurantCardPageHeight = { cardPagerHeight = it}
         )
     }
 }
