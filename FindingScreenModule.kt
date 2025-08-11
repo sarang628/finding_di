@@ -40,7 +40,6 @@ import com.sarang.torang.ui.FilterScreen
 import com.sarang.torang.ui.FilterViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
 fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
@@ -64,12 +63,10 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     Box {
         FindScreen(
             restaurantCardPage = {
-                Column {
-                    CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
-                        RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
-                            onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
-                                moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
-                    }
+                CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
+                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
+                        onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
+                            moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
                 }
             },
             mapScreen = {
