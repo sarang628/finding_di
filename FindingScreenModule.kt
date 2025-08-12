@@ -1,12 +1,9 @@
 package com.sarang.torang.di.finding_di
 
+import android.Manifest
 import android.util.Log
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -18,14 +15,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.viewmodel.FindViewModel
 import com.example.screen_map.compose.MapScreenForFinding
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.RootNavController
@@ -35,14 +36,16 @@ import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage
 import com.sarang.torang.di.image.provideTorangAsyncImage
-import com.sarang.torang.di.map_di.CurrentLocationScreen
 import com.sarang.torang.ui.FilterScreen
 import com.sarang.torang.ui.FilterViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
+@RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
-fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController) {
+fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController, isGrantedPermission : Boolean = false, onRequestPermission : () -> Unit = {}) {
     val uiState = findViewModel.uiState
     val cameraPositionState = rememberCameraPositionState()
     val coroutineScope = rememberCoroutineScope()
@@ -52,6 +55,10 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     val tag = "__Finding"
     var cardPagerHeight : Int by remember { mutableIntStateOf(0) }
     val cardPagerHeightDp = with(LocalDensity.current) { cardPagerHeight.toDp() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val usePreciseLocation = true
 
     LaunchedEffect(key1 = uiState.errorMessage, block = { // error snack bar
         uiState.errorMessage?.let {
@@ -82,14 +89,20 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                         onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} )
                 }
             },
-            myLocation = {
-                CurrentLocationScreen(onLocation = {
-                    findViewModel.setCurrentLocation(it)
-                    coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
-                    myLocation = LatLng(it.latitude, it.longitude)
-                }, contents = {
-                    AssistChip(it, label = { Icon(Icons.Default.LocationOn, "") })
-                })
+            onMyLocation = {
+                if(!isGrantedPermission){
+                    onRequestPermission.invoke()
+                }else{
+                    scope.launch(Dispatchers.IO) {
+                        val priority = if (usePreciseLocation) { Priority.PRIORITY_HIGH_ACCURACY } else { Priority.PRIORITY_BALANCED_POWER_ACCURACY }
+                        val result = locationClient.getCurrentLocation(priority, CancellationTokenSource().token,).await()
+                        result?.let { it ->
+                            findViewModel.setCurrentLocation(it)
+                            coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
+                            myLocation = LatLng(it.latitude, it.longitude)
+                        }
+                    }
+                }
             },
             buttonBottomPadding = 0.dp,
             onChangeRestaurantCardPageHeight = { cardPagerHeight = it}
