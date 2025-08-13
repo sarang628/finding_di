@@ -36,8 +36,8 @@ import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage
 import com.sarang.torang.di.image.provideTorangAsyncImage
-import com.sarang.torang.ui.FilterScreen
-import com.sarang.torang.ui.FilterViewModel
+import com.sarang.torang.compose.FilterScreen
+import com.sarang.torang.compose.FilterViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

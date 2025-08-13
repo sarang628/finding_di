@@ -6,7 +6,7 @@ import com.example.screen_map.data.MarkerData
 import com.sarang.torang.BuildConfig
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
 import com.sarang.torang.data.remote.response.RestaurantResponseDto
-import com.sarang.torang.ui.FilterUiState
+import com.sarang.torang.compose.FilterUiState
 
 
 fun String.toBoundary(): Double {
