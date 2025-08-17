@@ -9,6 +9,7 @@ import com.example.screen_finding.viewmodel.Filter
 import com.sarang.torang.api.ApiRestaurant
 import com.sarang.torang.api.handle
 import com.sarang.torang.data.SearchType
+import com.sarang.torang.data.remote.response.FilterApiModel
 import com.sarang.torang.repository.FindRepository
 import com.sarang.torang.repository.MapRepository
 import dagger.Module
@@ -26,7 +27,7 @@ class FindingServiceModule {
         return object : FindRestaurantUseCase {
             override suspend fun filter(filter: Filter) {
                 try {
-                    val filter1 = com.sarang.torang.data.Filter();
+                    val filter1 = FilterApiModel();
                     filter1.keyword = filter.keyword
                     filter1.east = filter.east
                     filter1.west = filter.west
@@ -37,7 +38,7 @@ class FindingServiceModule {
                     filter1.distances = filter.distances
                     if(filter.distances == "")
                         filter1.distances = null
-                    filter1.searchType = SearchType.valueOf(filter.searchType)
+                    filter1.searchType = filter.searchType.toString()
                     filter1.restaurantTypes = filter.restaurantTypes
                     filter1.ratings = filter.ratings
                     filter1.prices = filter.prices
@@ -62,7 +63,7 @@ class FindingServiceModule {
                 filter.east = mapRepository.getNElat()
                 filter.south = mapRepository.getSWlon()
                 filter.west = mapRepository.getSWlat()
-                filter.searchType = SearchType.BOUND
+                filter.searchType = SearchType.BOUND.toString()
                 try {
                     findRepository.search(filter)
                 } catch (e: HttpException) {
@@ -87,7 +88,7 @@ class FindingServiceModule {
                 filter.east = mapRepository.getNElat()
                 filter.south = mapRepository.getSWlon()
                 filter.west = mapRepository.getSWlat()
-                filter.searchType = SearchType.BOUND
+                filter.searchType = SearchType.BOUND.toString()
                 filter.keyword = filter.keyword
                 try {
                     findRepository.search(filter)

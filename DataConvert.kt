@@ -7,6 +7,7 @@ import com.sarang.torang.BuildConfig
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
 import com.sarang.torang.data.remote.response.RestaurantResponseDto
 import com.sarang.torang.compose.FilterUiState
+import com.sarang.torang.data.remote.response.FilterApiModel
 
 
 fun String.toBoundary(): Double {
@@ -20,8 +21,8 @@ fun String.toBoundary(): Double {
     )
 }
 
-fun Filter.toFilter(): com.sarang.torang.data.Filter {
-    return com.sarang.torang.data.Filter(
+fun Filter.toFilter(): FilterApiModel {
+    return FilterApiModel(
         restaurantTypes = this.restaurantTypes?.map { it.uppercase() }?.toList(),
         prices = this.prices,
         ratings = this.ratings?.toRating(),
