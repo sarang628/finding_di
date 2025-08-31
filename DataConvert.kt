@@ -27,12 +27,12 @@ fun Filter.toFilter(): FilterApiModel {
         prices = this.prices,
         ratings = this.ratings?.toRating(),
         distances = this.distances?.toDistance(),
-        lat = this.lat,
-        lon = this.lon,
-        north = this.north,
-        south = this.south,
-        east = this.east,
-        west = this.west,
+        latitude = this.lat,
+        longitude = this.lon,
+        northEastLat = this.north,
+        northEastLon = this.south,
+        southWestLat = this.east,
+        southWestLon = this.west,
         keyword = keyword
     )
 }
