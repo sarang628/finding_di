@@ -69,30 +69,21 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
 
     Box {
         FindScreen(
-            restaurantCardPage = {
-                CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
-                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible,
-                        onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}")
-                            moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
+            restaurantCardPage = { CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
+                    RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible, onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}"); moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
                 }
             },
-            mapScreen = {
-                MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation, logoBottomPadding = cardPagerHeightDp)
-            },
+            mapScreen = { MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation, logoBottomPadding = cardPagerHeightDp) },
             onZoomIn = { zoomIn(coroutineScope, cameraPositionState) },
             onZoomOut = { zoomOut(coroutineScope, cameraPositionState) },
-            filter = {
-                CompositionLocalProvider(LocalFilterImageLoader provides filterImageLoader) {
-                    FilterScreen(filterViewModel = filterViewModel,
-                        visible = isVisible,
+            filter = { CompositionLocalProvider(LocalFilterImageLoader provides filterImageLoader) {
+                        FilterScreen(filterViewModel = filterViewModel, visible = isVisible,
                         onNation = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-                        onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} )
-                }
-            },
+                        onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} ) }
+                     },
             onMyLocation = {
-                if(!isGrantedPermission){
-                    onRequestPermission.invoke()
-                }else{
+                if(!isGrantedPermission){ onRequestPermission.invoke() }
+                else{
                     scope.launch(Dispatchers.IO) {
                         val priority = if (usePreciseLocation) { Priority.PRIORITY_HIGH_ACCURACY } else { Priority.PRIORITY_BALANCED_POWER_ACCURACY }
                         val result = locationClient.getCurrentLocation(priority, CancellationTokenSource().token,).await()
