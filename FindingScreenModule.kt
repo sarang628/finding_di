@@ -88,7 +88,7 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
 
     CompositionLocalProvider(LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader){
         Box {
-        RestaurantListBottomSheet(modifier = Modifier, sheetPeekHeight = 0.dp, scaffoldState = bottomSheetState){
+        RestaurantListBottomSheet(modifier = Modifier, sheetPeekHeight = 0.dp, scaffoldState = bottomSheetState, onClickRestaurantName = { coroutineScope.launch { bottomSheetState.bottomSheetState.partialExpand() } }){
                 FindScreen(
                     restaurantCardPage = { CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
                         RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible, onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}"); moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
