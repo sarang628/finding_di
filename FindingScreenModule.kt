@@ -10,8 +10,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -84,8 +87,8 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
     })
 
     CompositionLocalProvider(LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader){
+        Box {
         RestaurantListBottomSheet(modifier = Modifier, sheetPeekHeight = 0.dp, scaffoldState = bottomSheetState){
-            Box {
                 FindScreen(
                     restaurantCardPage = { CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
                         RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible, onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}"); moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
@@ -116,9 +119,10 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                     buttonBottomPadding = 0.dp,
                     onChangeRestaurantCardPageHeight = { cardPagerHeight = it}
                 )
-
-                FloatingActionButton(modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp).size(50.dp), onClick = {coroutineScope.launch { bottomSheetState.bottomSheetState.expand() }}, shape = CircleShape) { Icon(Icons.AutoMirrored.Default.List, "") }
             }
+            FloatingActionButton(modifier = Modifier.size(66.dp).padding(16.dp).align(if(isVisible)Alignment.CenterEnd else Alignment.BottomEnd), shape = CircleShape,
+                onClick = {coroutineScope.launch { if(bottomSheetState.bottomSheetState.currentValue != SheetValue.Expanded) bottomSheetState.bottomSheetState.expand() else bottomSheetState.bottomSheetState.partialExpand() }})
+            { Icon(Icons.AutoMirrored.Default.List, "") }
         }
     }
 }
