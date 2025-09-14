@@ -1,6 +1,7 @@
 package com.sarang.torang.di.finding_di
 
 import android.Manifest
+import android.content.Context
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -18,6 +22,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_finding.ui.FindScreen
+import com.example.screen_finding.uistate.FindingUiState
 import com.example.screen_finding.viewmodel.FindViewModel
 import com.example.screen_map.compose.MapScreenForFinding
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -46,6 +54,8 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.LocalRestaurantItemImageLoader
 import com.sarang.torang.RestaurantListBottomSheet
 import com.sarang.torang.RootNavController
+import com.sarang.torang.compose.FilterDrawer
+import com.sarang.torang.compose.FilterDrawerScreen
 import com.sarang.torang.compose.FilterImageLoader
 import com.sarang.torang.compose.LocalFilterImageLoader
 import com.sarang.torang.compose.cardinfo.CardInfoImageLoader
@@ -53,6 +63,7 @@ import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.compose.FilterScreen
+import com.sarang.torang.compose.FilterScreen1
 import com.sarang.torang.compose.FilterViewModel
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
 import kotlinx.coroutines.CoroutineScope
@@ -64,20 +75,21 @@ import kotlinx.coroutines.tasks.await
 @RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
 fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: FilterViewModel = hiltViewModel(), navController: RootNavController, isGrantedPermission : Boolean = false, onRequestPermission : () -> Unit = {}) {
-    val uiState = findViewModel.uiState
-    val cameraPositionState = rememberCameraPositionState()
-    val coroutineScope = rememberCoroutineScope()
-    var isVisible by remember { mutableStateOf(true) }
-    var myLocation: LatLng? by remember { mutableStateOf(null) }
-    val snackBarHostState = remember { SnackbarHostState() }
-    val tag = "__Finding"
-    var cardPagerHeight : Int by remember { mutableIntStateOf(0) }
-    val cardPagerHeightDp = with(LocalDensity.current) { cardPagerHeight.toDp() }
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val locationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    val usePreciseLocation = true
-    val bottomSheetState = rememberBottomSheetScaffoldState()
+    val tag                 : String                        = "__Finding"
+    val uiState             : FindingUiState                = findViewModel.uiState
+    val cameraPositionState : CameraPositionState           = rememberCameraPositionState()
+    val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
+    val scope               : CoroutineScope                = rememberCoroutineScope()
+    val snackBarHostState   : SnackbarHostState             = remember { SnackbarHostState() }
+    val context             : Context                       = LocalContext.current
+    val usePreciseLocation  : Boolean                       = true
+    val locationClient      : FusedLocationProviderClient   = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val bottomSheetState    : BottomSheetScaffoldState      = rememberBottomSheetScaffoldState()
+    val drawerState         : DrawerState                   = rememberDrawerState(initialValue = DrawerValue.Closed)
+    var isVisible           : Boolean                       by remember { mutableStateOf(true) }
+    var myLocation          : LatLng?                       by remember { mutableStateOf(null) }
+    var cardPagerHeight     : Int                           by remember { mutableIntStateOf(0) }
+    val cardPagerHeightDp   : Dp                            = with(LocalDensity.current){ cardPagerHeight.toDp() }
 
     LaunchedEffect(key1 = uiState.errorMessage, block = { // error snack bar
         uiState.errorMessage?.let {
@@ -86,9 +98,16 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
         }
     })
 
-    CompositionLocalProvider(LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader){
+    CompositionLocalProvider(LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader,
+        LocalFilterImageLoader provides filterImageLoader){
+        val drawerState : DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         Box {
         RestaurantListBottomSheet(modifier = Modifier, sheetPeekHeight = 0.dp, scaffoldState = bottomSheetState, onClickRestaurantName = { coroutineScope.launch { bottomSheetState.bottomSheetState.partialExpand() } }){
+            FilterDrawerScreen(filterViewModel = filterViewModel ,
+                drawerState = drawerState,
+                onFilterNation = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                onFilterCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)}
+                ) {
                 FindScreen(
                     restaurantCardPage = { CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
                         RestaurantCardPage(onClickCard = { navController.restaurant(it) }, visible = isVisible, onPosition = { lat,lon-> Log.i(tag, "onPosition ${lat}, ${lon}"); moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) } )
@@ -97,11 +116,11 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                     mapScreen = { MapScreenForFinding(cameraPositionState = cameraPositionState, onMapClick = { isVisible = !isVisible; Log.d("Finding", "onMapClick $isVisible") }, myLocation = myLocation, logoBottomPadding = cardPagerHeightDp) },
                     onZoomIn = { zoomIn(coroutineScope, cameraPositionState) },
                     onZoomOut = { zoomOut(coroutineScope, cameraPositionState) },
-                    filter = { CompositionLocalProvider(LocalFilterImageLoader provides filterImageLoader) {
-                        FilterScreen(filterViewModel = filterViewModel, visible = isVisible,
+                    filter = {
+                        FilterScreen1(filterViewModel = filterViewModel, visible = isVisible,
+                            onFilter = {coroutineScope.launch { drawerState.open() }},
                             onNation = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-                            onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} ) }
-                    },
+                            onCity = { moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)} ) },
                     onMyLocation = {
                         if(!isGrantedPermission){ onRequestPermission.invoke() }
                         else{
@@ -119,6 +138,7 @@ fun Finding(findViewModel: FindViewModel = hiltViewModel(), filterViewModel: Fil
                     buttonBottomPadding = 0.dp,
                     onChangeRestaurantCardPageHeight = { cardPagerHeight = it}
                 )
+                }
             }
             FloatingActionButton(modifier = Modifier.size(66.dp).padding(16.dp).align(if(isVisible)Alignment.CenterEnd else Alignment.BottomEnd), shape = CircleShape,
                 onClick = {coroutineScope.launch { if(bottomSheetState.bottomSheetState.currentValue != SheetValue.Expanded) bottomSheetState.bottomSheetState.expand() else bottomSheetState.bottomSheetState.partialExpand() }})
