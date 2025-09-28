@@ -29,11 +29,11 @@ import com.sryang.library.compose.workflow.RationaleDialog
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun FindingWithPermission(
+fun findingWithPermission(
     viewModel: BestPracticeViewModel = BestPracticeViewModel(),
     permission : String = Manifest.permission.ACCESS_FINE_LOCATION,
     navController : RootNavController
-) {
+) : @Composable () -> Unit = {
     var timeDiff : Long by remember { mutableStateOf(0L) } // 영구 권한 거부 상태 체크를 위한 시간
     val requestPermission = rememberPermissionState(permission, { viewModel.permissionResult(it, System.currentTimeMillis() - timeDiff); })
     val state = viewModel.state
