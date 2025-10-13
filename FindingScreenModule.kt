@@ -12,15 +12,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -44,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_finding.ui.FindScreen
 import com.example.screen_finding.uistate.FindingUiState
+import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_finding.viewmodel.FindViewModel
 import com.example.screen_map.compose.MapScreenForFinding_
 import com.example.screen_map.viewmodels.MapUIState
@@ -54,6 +62,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -62,6 +71,7 @@ import com.sarang.torang.RestaurantItemUiState
 import com.sarang.torang.RestaurantListBottomSheetViewModel
 import com.sarang.torang.RestaurantListBottomSheet_
 import com.sarang.torang.RootNavController
+import com.sarang.torang.Sample
 import com.sarang.torang.compose.Filter1
 import com.sarang.torang.compose.FilterDrawer
 import com.sarang.torang.compose.FilterImageLoader
@@ -77,6 +87,8 @@ import com.sarang.torang.data.City
 import com.sarang.torang.data.Nation
 import com.sarang.torang.di.image.provideTorangAsyncImage
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
+import com.sarang.torang.uistate.FilterCallback
+import com.sarang.torang.uistate.FilterDrawerCallBack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -115,21 +127,18 @@ fun Finding(
         onRequestPermission = onRequestPermission,
         navController       = navController,
         onCurrentLocation   = { findViewModel.setCurrentLocation(it) },
-        onFoodType          = { filterViewModel.setType("FoodType") },
-        onPrice             = { filterViewModel.setType("Price") },
-        onDistance          = { filterViewModel.setType("Distance") },
-        onRating            = { filterViewModel.setType("Rating") },
+        filterDrawerCallBack = FilterDrawerCallBack(
         onFilterFoodType    = { filterViewModel.setFoodType(it) },
         onFilterPrice       = { filterViewModel.setPrice(it) },
         onFilterDistance    = { filterViewModel.setDistance(it) },
         onFilterRating      = { filterViewModel.setRating(it) },
-        onNation            = { filterViewModel.onNation() },
-        onThisArea          = { filterViewModel.onThisArea() },
-        onFilter            = { filterViewModel.onFilter()},
         onFilterCity        = { filterViewModel.onCity(it)},
         onFilterNation      = { filterViewModel.onNation(it)},
+        onQueryChange       = { filterViewModel.setQuery(it) }),
+        filterCallback      = FilterCallback(
+        onFilter            = { filterViewModel.onFilter()},
         onSearch            = { /*onSearch.invoke(uiState)*/ },
-        onQueryChange       = { filterViewModel.setQuery(it) },
+        onThisArea          = { filterViewModel.onThisArea() },),
         onMark              = { mapViewModel.onMark(it) },
         onSaveCameraPosition = { mapViewModel.saveCameraPosition(it) },
         onMapLoaded = {
@@ -148,41 +157,29 @@ fun Finding(
 @Preview
 @Composable
 private fun Finding1(
-    uiState                 : FindingUiState                = FindingUiState(),
-    filterUiState           : FilterUiState                 = FilterUiState(),
-    mapUiState              : MapUIState                    = MapUIState(),
-    bottomSheetUiState      : List<RestaurantItemUiState>   = listOf(),
-    cardUiState             : List<RestaurantCardUIState>   = listOf(),
-    navController           : RootNavController             = RootNavController(),
+    modifier                : Modifier                      = Modifier,
     isGrantedPermission     : Boolean                       = false,
     visible                 : Boolean                       = false,
     topPadding              : Dp                            = 0.dp,
     boundary                : Double?                       = null,
     cameraSpeed             : Int                           = 300,
     markerDetailVisibleLevel: Float                         = 18f,
+    uiState                 : FindingUiState                = FindingUiState(),
+    filterUiState           : FilterUiState                 = FilterUiState(),
+    mapUiState              : MapUIState                    = MapUIState(),
+    bottomSheetUiState      : List<RestaurantItemUiState>   = listOf(),
+    cardUiState             : List<RestaurantCardUIState>   = listOf(),
+    navController           : RootNavController             = RootNavController(),
+    cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
+    uiSettings              : MapUiSettings                 = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
+    filterCallback          : FilterCallback                = FilterCallback(),
+    filterDrawerCallBack    : FilterDrawerCallBack          = FilterDrawerCallBack(),
     onClearErrorMessage     : () -> Unit                    = {},
     onRequestPermission     : () -> Unit                    = {},
-    onFoodType              : () -> Unit                    = {},
-    onPrice                 : () -> Unit                    = {},
-    onRating                : () -> Unit                    = {},
-    onDistance              : () -> Unit                    = {},
-    onNation                : () -> Unit                    = {},
-    onThisArea              : () -> Unit                    = {},
-    onFilter                : () -> Unit                    = {},
-    onSearch                : () -> Unit                    = {},
     onCurrentLocation       : (Location)->Unit              = {},
-    onFilterFoodType        : (String) -> Unit              = {},
-    onFilterPrice           : (String) -> Unit              = {},
-    onFilterRating          : (String) -> Unit              = {},
-    onFilterDistance        : (String) -> Unit              = {},
-    onFilterCity            : (City) -> Unit                = {},
-    onFilterNation          : (Nation) -> Unit              = {},
-    onQueryChange           : (String) -> Unit              = {},
     onSaveCameraPosition    : (CameraPositionState) -> Unit = {},
-    cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
     onMark                  : (Int) -> Unit                 = {},
     onMapLoaded             : () -> Unit                    = {},
-    uiSettings              : MapUiSettings                 = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
 ){
     val tag                 : String                        = "__Finding"
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
@@ -208,21 +205,13 @@ private fun Finding1(
         Filter1(
             uiState             = filterUiState,
             visible             = visible,
-            onFoodType          = onFoodType,
-            onPrice             = onPrice,
-            onDistance          = onDistance,
-            onRating            = onRating,
-            onFilterFoodType    = onFilterFoodType,
-            onFilterPrice       = onFilterPrice,
-            onFilterDistance    = onFilterDistance,
-            onFilterRating      = onFilterRating,
-            onNation            = onNation,
-            onThisArea          = onThisArea,
-            onFilter            = { onFilter(); coroutineScope.launch { drawerState.open() } },
-            onFilterCity        = { onFilterCity(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-            onFilterNation      = { onFilterNation(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-            onSearch            = { onSearch.invoke() },
-            onQueryChange       = { onQueryChange(it) },
+            filterCallback      = FilterCallback(
+            onThisArea          = filterCallback.onThisArea,
+            onFilter            = { filterCallback.onFilter(); coroutineScope.launch { drawerState.open() } },
+            onFilterCity        = { filterCallback.onFilterCity(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+            onFilterNation      = { filterCallback.onFilterNation(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+            onSearch            = { filterCallback.onSearch.invoke() },
+            onQueryChange       = { filterCallback.onQueryChange(it) },),
             topPadding          = topPadding
         )
     }
@@ -283,15 +272,16 @@ private fun Finding1(
 
     val filterDraw : @Composable (PaddingValues) -> Unit = {
         FilterDrawer(
-            uiState             = filterUiState,
-            drawerState         = drawerState,
-            onFilterFoodType    = onFilterFoodType,
-            onFilterPrice       = onFilterPrice,
-            onFilterDistance    = onFilterDistance,
-            onFilterRating      = onFilterRating,
-            onFilterCity        = { onFilterCity(it); onFilterCity.invoke(it) },
-            onFilterNation      = { onFilterNation(it); onFilterNation.invoke(it) },
-            onQueryChange       = { onQueryChange(it) },
+            uiState              = filterUiState,
+            drawerState          = drawerState,
+            filterDrawerCallBack = FilterDrawerCallBack(
+            onFilterFoodType     = filterDrawerCallBack.onFilterFoodType,
+            onFilterPrice        = filterDrawerCallBack.onFilterPrice,
+            onFilterDistance     = filterDrawerCallBack.onFilterDistance,
+            onFilterRating       = filterDrawerCallBack.onFilterRating,
+            onFilterCity         = { filterDrawerCallBack.onFilterCity(it); filterCallback.onFilterCity.invoke(it) },
+            onFilterNation       = { filterDrawerCallBack.onFilterNation(it); filterCallback.onFilterNation.invoke(it) },
+            onQueryChange        = { filterDrawerCallBack.onQueryChange(it) },),
             content             = findScreen
         )
     }
@@ -300,7 +290,7 @@ private fun Finding1(
     CompositionLocalProvider(LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader,
         LocalFilterImageLoader provides filterImageLoader){
         val drawerState : DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        Box {
+        Box(modifier = modifier) {
             RestaurantListBottomSheet_(
                 modifier = Modifier,
                 uiState = bottomSheetUiState,
@@ -324,3 +314,19 @@ fun zoomIn(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionSt
 fun zoomOut(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) } }
 fun moveCamera(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, latitude : Double, longitude : Double, zoom : Float){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom), 1000) } }
 fun moveCamera1(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, lat : Double, lon : Double){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(lat, lon)), 300) } }
+
+@Preview
+@Composable
+fun BottomAppBarTest(){
+    Scaffold(
+        bottomBar = {
+            BottomAppBar(     actions = {         IconButton(onClick = { /* doSomething() */ }) {             Icon(Icons. Filled. Menu, contentDescription = "Localized description")         }     } )
+        }
+    ) {
+        Finding1(
+            modifier = Modifier.padding(it),
+            bottomSheetUiState = listOf(RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample)
+        )
+    }
+
+}
