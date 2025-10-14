@@ -32,7 +32,8 @@ import com.sryang.library.compose.workflow.RationaleDialog
 fun  findingWithPermission(
     viewModel: BestPracticeViewModel = BestPracticeViewModel(),
     permission : String = Manifest.permission.ACCESS_FINE_LOCATION,
-    navController : RootNavController = RootNavController()
+    navController : RootNavController = RootNavController(),
+    findState : FindState = rememberFindState()
 ) : @Composable () -> Unit = {
     var timeDiff : Long by remember { mutableStateOf(0L) } // 영구 권한 거부 상태 체크를 위한 시간
     val requestPermission = rememberPermissionState(permission, { viewModel.permissionResult(it, System.currentTimeMillis() - timeDiff); })
@@ -52,6 +53,10 @@ fun  findingWithPermission(
 
     Box {
         Text(state.toString().split("$")[1].split("@")[0])
-        Find(navController = navController, isGrantedPermission = state == GrantedPermission, onRequestPermission = {viewModel.request()})
+        Find(navController = navController,
+            isGrantedPermission = state == GrantedPermission,
+            onRequestPermission = {viewModel.request()},
+            findState = findState
+        )
     }
 }

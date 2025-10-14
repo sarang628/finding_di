@@ -3,10 +3,8 @@ package com.sarang.torang.di.finding_di
 import android.Manifest
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -32,12 +30,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -64,9 +61,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.LocalRestaurantItemImageLoader
 import com.sarang.torang.RestaurantItemUiState
 import com.sarang.torang.RestaurantListBottomSheetViewModel
-import com.sarang.torang.RestaurantListBottomSheet_
 import com.sarang.torang.RootNavController
-import com.sarang.torang.Sample
 import com.sarang.torang.compose.Filter1
 import com.sarang.torang.compose.FilterDrawer
 import com.sarang.torang.compose.FilterUiState
@@ -89,9 +84,9 @@ import kotlinx.coroutines.tasks.await
 @RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
 fun Find(
+    findState                           : FindState                             = rememberFindState(),
     findViewModel                       : FindViewModel                         = hiltViewModel(),
     filterViewModel                     : FilterViewModel                       = hiltViewModel(),
-    restaurantListBottomSheetViewModel  : RestaurantListBottomSheetViewModel    = hiltViewModel(),
     cardInfoViewModel                   : CardInfoViewModel                     = hiltViewModel(),
     mapViewModel                        : MapViewModel                          = hiltViewModel(),
     navController                       : RootNavController                     = RootNavController(),
@@ -104,7 +99,6 @@ fun Find(
     val filterUiState       : FilterUiState                 = filterViewModel.uiState
     val cardUiState         : List<RestaurantCardUIState>   = cardInfoViewModel.cardInfos
     val mapUiState          : MapUIState                    = mapViewModel.uiState
-    val bottonSheetUiState  : List<RestaurantItemUiState>   by restaurantListBottomSheetViewModel.uiState.collectAsState()
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
     val cameraPositionState : CameraPositionState           = rememberCameraPositionState()
 
@@ -119,10 +113,10 @@ fun Find(
 
     Find1(
         uiState              = findUiState,
+        findState            = findState,
         mapUiState           = mapUiState,
         filterUiState        = filterUiState,
         cardUiState          = cardUiState,
-        bottomSheetUiState   = bottonSheetUiState,
         cameraPositionState  = cameraPositionState,
         isGrantedPermission  = isGrantedPermission,
         onRequestPermission  = onRequestPermission,
@@ -154,11 +148,24 @@ fun Find(
     )
 }
 
+class FindState @OptIn(ExperimentalMaterial3Api::class) constructor(
+    val bottomSheetState        : BottomSheetScaffoldState,
+    val selectedRestaurantId    : Int? = null
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun rememberFindState() : FindState {
+    val bottomSheetState    : BottomSheetScaffoldState      = rememberBottomSheetScaffoldState()
+    return FindState(bottomSheetState)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 private fun Find1(
     modifier                : Modifier                      = Modifier,
+    findState               : FindState                     = rememberFindState(),
     isGrantedPermission     : Boolean                       = false,
     topPadding              : Dp                            = 0.dp,
     boundary                : Double?                       = null,
@@ -167,7 +174,6 @@ private fun Find1(
     uiState                 : FindUiState                   = FindUiState(),
     filterUiState           : FilterUiState                 = FilterUiState(),
     mapUiState              : MapUIState                    = MapUIState(),
-    bottomSheetUiState      : List<RestaurantItemUiState>   = listOf(),
     cardUiState             : List<RestaurantCardUIState>   = listOf(),
     navController           : RootNavController             = RootNavController(),
     cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
@@ -185,7 +191,6 @@ private fun Find1(
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
     val context             : Context                       = LocalContext.current
     val locationClient      : FusedLocationProviderClient   = remember { LocationServices.getFusedLocationProviderClient(context) }
-    val bottomSheetState    : BottomSheetScaffoldState      = rememberBottomSheetScaffoldState()
     val drawerState         : DrawerState                   = rememberDrawerState(initialValue = DrawerValue.Closed)
     var isVisible           : Boolean                       by remember { mutableStateOf(true) }
     var myLocation          : LatLng?                       by remember { mutableStateOf(null) }
@@ -263,7 +268,7 @@ private fun Find1(
         )
     }
 
-    val filterDraw : @Composable (PaddingValues) -> Unit = {
+    val filterDraw : @Composable () -> Unit = {
         FilterDrawer(
             uiState              = filterUiState,
             drawerState          = drawerState,
@@ -279,23 +284,12 @@ private fun Find1(
         )
     }
 
-    val restaurantBottonSheet : @Composable () -> Unit = {
-        RestaurantListBottomSheet_ (
-            modifier                = Modifier,
-            uiState                 = bottomSheetUiState,
-            sheetPeekHeight         = 0.dp,
-            scaffoldState           = bottomSheetState,
-            onClickRestaurantName   = { coroutineScope.launch { bottomSheetState.bottomSheetState.partialExpand() } },
-            content                 = filterDraw
-        )
-    }
-
     CompositionLocalProvider(
         LocalRestaurantItemImageLoader provides CustomRestaurantItemImageLoader,
         LocalFilterImageLoader provides filterImageLoader
     ){
         Box(modifier = modifier) {
-            restaurantBottonSheet.invoke()
+            filterDraw.invoke()
             FloatingActionButton (
                 modifier = Modifier
                                 .size(66.dp)
@@ -303,10 +297,10 @@ private fun Find1(
                                 .align(if(isVisible)Alignment.CenterEnd else Alignment.BottomEnd),
                 shape    = CircleShape,
                 onClick  = { coroutineScope.launch {
-                                if(bottomSheetState.bottomSheetState.currentValue != SheetValue.Expanded)
-                                    bottomSheetState.bottomSheetState.expand()
+                                if(findState.bottomSheetState.bottomSheetState.currentValue != SheetValue.Expanded)
+                                    findState.bottomSheetState.bottomSheetState.expand()
                                 else
-                                    bottomSheetState.bottomSheetState.partialExpand()
+                                    findState.bottomSheetState.bottomSheetState.partialExpand()
                               }
                             },
                 content = { Icon(Icons.AutoMirrored.Default.List, "") }
@@ -330,7 +324,6 @@ fun BottomAppBarTest(){
     ) {
         Find1(/*Preview*/
             modifier = Modifier.padding(it),
-            bottomSheetUiState = listOf(RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample,RestaurantItemUiState.Sample)
         )
     }
 
