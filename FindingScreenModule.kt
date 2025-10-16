@@ -136,6 +136,7 @@ fun Find(
         onThisArea           = { filterViewModel.onThisArea() },),
         onMark               = { mapViewModel.onMark(it) },
         onSaveCameraPosition = { mapViewModel.saveCameraPosition(it) },
+        onChangePage         = { cardInfoViewModel.onChangePage(it) },
         onMapLoaded = {
                 if (!mapViewModel.uiState.isMapLoaded) { // 플래그 처리 안하면 지도화면으로 이동할때마다 이벤트 발생 처음에 한번만 동작하면 됨
                     coroutineScope.launch {
@@ -186,6 +187,7 @@ private fun Find1(
     onSaveCameraPosition    : (CameraPositionState) -> Unit = {},
     onMark                  : (Int) -> Unit                 = {},
     onMapLoaded             : () -> Unit                    = {},
+    onChangePage            : ((Int) -> Unit)               = {},
 ){
     val tag                 : String                        = "__Finding"
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
@@ -237,7 +239,8 @@ private fun Find1(
                 restaurants = cardUiState,
                 onClickCard = { navController.restaurant(it) },
                 visible     = isVisible,
-                onPosition  = { lat,lon-> moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) }
+                onPosition  = { lat,lon-> moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) },
+                onChangePage = onChangePage
             )
         }
     }
