@@ -117,6 +117,7 @@ fun Find(
         mapUiState           = mapUiState,
         filterUiState        = filterUiState,
         cardUiState          = cardUiState,
+        cardFocusedRestaurant = cardInfoViewModel.focusedRestaurant,
         cameraPositionState  = cameraPositionState,
         isGrantedPermission  = isGrantedPermission,
         onRequestPermission  = onRequestPermission,
@@ -176,6 +177,7 @@ private fun Find1(
     filterUiState           : FilterUiState                 = FilterUiState(),
     mapUiState              : MapUIState                    = MapUIState(),
     cardUiState             : List<RestaurantCardUIState>   = listOf(),
+    cardFocusedRestaurant   : RestaurantCardUIState?        = null,
     navController           : RootNavController             = RootNavController(),
     cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
     snackBarHostState       : SnackbarHostState             = remember { SnackbarHostState() },
@@ -240,7 +242,8 @@ private fun Find1(
                 onClickCard = { navController.restaurant(it) },
                 visible     = isVisible,
                 onPosition  = { lat,lon-> moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) },
-                onChangePage = onChangePage
+                onChangePage = { if(isVisible) onChangePage.invoke(it) },
+                focusedRestaurant = cardFocusedRestaurant
             )
         }
     }
@@ -295,9 +298,9 @@ private fun Find1(
             filterDraw.invoke()
             FloatingActionButton (
                 modifier = Modifier
-                                .size(66.dp)
-                                .padding(16.dp)
-                                .align(if(isVisible)Alignment.CenterEnd else Alignment.BottomEnd),
+                    .size(66.dp)
+                    .padding(16.dp)
+                    .align(if (isVisible) Alignment.CenterEnd else Alignment.BottomEnd),
                 shape    = CircleShape,
                 onClick  = { coroutineScope.launch {
                                 if(findState.bottomSheetState.bottomSheetState.currentValue != SheetValue.Expanded)
