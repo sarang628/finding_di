@@ -29,7 +29,7 @@ import com.sryang.library.compose.workflow.RationaleDialog
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun  findingWithPermission(
+fun findingWithPermission(
     viewModel: BestPracticeViewModel = BestPracticeViewModel(),
     permission : String = Manifest.permission.ACCESS_FINE_LOCATION,
     navController : RootNavController = RootNavController(),
