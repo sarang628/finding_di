@@ -1,13 +1,14 @@
 package com.sarang.torang.di.finding_di
 
-import com.example.screen_finding.data.RestaurantInfo
-import com.example.screen_finding.viewmodel.Filter
 import com.example.screen_map.data.MarkerData
 import com.sarang.torang.BuildConfig
-import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
-import com.sarang.torang.data.remote.response.RestaurantResponseDto
 import com.sarang.torang.compose.FilterUiState
-import com.sarang.torang.data.remote.response.FilterApiModel
+import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
+import com.sarang.torang.data.Filter
+import com.sarang.torang.data.finding.FindingFilter
+import com.sarang.torang.data.finding.RestaurantInfo
+import com.sarang.torang.data.remote.response.RatingApiModel
+import com.sarang.torang.data.remote.response.RestaurantResponseDto
 
 
 fun String.toBoundary(): Double {
@@ -21,18 +22,18 @@ fun String.toBoundary(): Double {
     )
 }
 
-fun Filter.toFilter(): FilterApiModel {
-    return FilterApiModel(
+fun FindingFilter.toFilter(): Filter {
+    return Filter(
         restaurantTypes = this.restaurantTypes?.map { it.uppercase() }?.toList(),
         prices = this.prices,
-        ratings = this.ratings?.toRating(),
+        ratings = this.ratings,
         distances = this.distances?.toDistance(),
-        latitude = this.lat,
-        longitude = this.lon,
-        northEastLat = this.north,
-        northEastLon = this.south,
-        southWestLat = this.east,
-        southWestLon = this.west,
+        lat = this.latitude,
+        lon = this.longitude,
+        northEastLat = this.northEastLon,
+        northEastLon = this.southWestLon,
+        southWestLat = this.northEastLat,
+        southWestLon = this.southWestLat,
         keyword = keyword
     )
 }
@@ -47,15 +48,15 @@ fun String.toDistance(): String? {
     )
 }
 
-fun List<String>.toRating(): List<String>? {
+fun List<String>.toRating(): List<RatingApiModel> {
     return this.map {
-        if (it == "*") "ONE"
-        else if (it == "**") "TWO"
-        else if (it == "***") "THREE"
-        else if (it == "****") "FOUR"
-        else if (it == "*****") "FIVE"
-        else ""
-    }.toList()
+        if (it == "*") RatingApiModel.ONE
+        else if (it == "**") RatingApiModel.TWO
+        else if (it == "***") RatingApiModel.THREE
+        else if (it == "****") RatingApiModel.FOUR
+        else if (it == "*****") RatingApiModel.FIVE
+        else RatingApiModel.ONE
+    }
 }
 
 fun RestaurantResponseDto.toRestaurantInfo(): RestaurantInfo {

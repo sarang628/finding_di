@@ -28,13 +28,12 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,9 +42,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.screen_finding.ui.FindScreen
-import com.example.screen_finding.uistate.FindUiState
-import com.example.screen_finding.viewmodel.FindViewModel
+import com.sarang.torang.ui.FindScreen
+import com.sarang.torang.uistate.FindUiState
+import com.sarang.torang.viewmodel.FindViewModel
 import com.example.screen_map.compose.MapScreenForFinding_
 import com.example.screen_map.viewmodels.MapUIState
 import com.example.screen_map.viewmodels.MapViewModel
@@ -59,11 +58,9 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.sarang.torang.LocalRestaurantItemImageLoader
-import com.sarang.torang.RestaurantItemUiState
-import com.sarang.torang.RestaurantListBottomSheetViewModel
 import com.sarang.torang.RootNavController
-import com.sarang.torang.compose.Filter1
-import com.sarang.torang.compose.FilterDrawer
+import com.sarang.torang.compose.Filter
+import com.sarang.torang.compose.FilterMediumDrawer
 import com.sarang.torang.compose.FilterUiState
 import com.sarang.torang.compose.FilterViewModel
 import com.sarang.torang.compose.LocalFilterImageLoader
@@ -203,7 +200,7 @@ private fun Find1(
     val usePreciseLocation  : Boolean                       = true
 
     val filter : @Composable () -> Unit = {
-        Filter1(
+        Filter(
             uiState             = filterUiState,
             visible             = isVisible,
             filterCallback      = FilterCallback(
@@ -275,7 +272,7 @@ private fun Find1(
     }
 
     val filterDraw : @Composable () -> Unit = {
-        FilterDrawer(
+        FilterMediumDrawer(
             uiState              = filterUiState,
             drawerState          = drawerState,
             filterDrawerCallBack = FilterDrawerCallBack(

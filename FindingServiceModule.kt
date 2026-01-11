@@ -1,18 +1,20 @@
 package com.sarang.torang.di.finding_di
 
 import android.location.Location
-import androidx.room.util.copy
-import com.example.screen_finding.data.RestaurantInfo
-import com.example.screen_finding.usecase.FindRestaurantUseCase
-import com.example.screen_finding.usecase.SearchByKeywordUseCase
-import com.example.screen_finding.usecase.SearchThisAreaUseCase
-import com.example.screen_finding.viewmodel.Filter
+import androidx.compose.runtime.key
 import com.sarang.torang.api.ApiRestaurant
 import com.sarang.torang.api.handle
+import com.sarang.torang.data.Filter
 import com.sarang.torang.data.SearchType
+import com.sarang.torang.data.finding.FindingFilter
+import com.sarang.torang.data.finding.RestaurantInfo
 import com.sarang.torang.data.remote.response.FilterApiModel
+import com.sarang.torang.data.remote.response.RestaurantResponseDto
 import com.sarang.torang.repository.FindRepository
 import com.sarang.torang.repository.MapRepository
+import com.sarang.torang.usecase.FindRestaurantUseCase
+import com.sarang.torang.usecase.SearchByKeywordUseCase
+import com.sarang.torang.usecase.SearchThisAreaUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,23 +28,23 @@ class FindingServiceModule {
     @Provides
     fun provideFindingService(findRepository: FindRepository): FindRestaurantUseCase {
         return object : FindRestaurantUseCase {
-            override suspend fun filter(filter: Filter) {
+            override suspend fun filter(filter: FindingFilter) {
                 try {
-                    val filter1 = FilterApiModel(
+                    val filter = Filter(
                         keyword = filter.keyword,
-                                northEastLat = filter.east,
-                                southWestLat = filter.west,
-                                southWestLon = filter.south,
-                                northEastLon = filter.north,
-                                latitude = filter.lat,
-                                longitude = filter.lon,
-                                distances = filter.distances,
-                                searchType = filter.searchType.toString(),
-                                restaurantTypes = filter.restaurantTypes,
-                                ratings = filter.ratings,
-                                prices = filter.prices
+                        northEastLat = filter.northEastLat,
+                        southWestLat = filter.southWestLat,
+                        southWestLon = filter.southWestLon,
+                        northEastLon = filter.northEastLon,
+                        lat = filter.latitude,
+                        lon = filter.longitude,
+                        distances = filter.distances,
+                        searchType = SearchType.valueOf(filter.searchType),
+                        restaurantTypes = filter.restaurantTypes,
+                        ratings = filter.ratings,
+                        prices = filter.prices
                     );
-                    findRepository.search(filter1)
+                    findRepository.search(filter)
                 } catch (e: HttpException) {
                     throw Exception(e.handle())
                 }
@@ -56,14 +58,14 @@ class FindingServiceModule {
         findRepository: FindRepository
     ): SearchThisAreaUseCase {
         return object : SearchThisAreaUseCase {
-            override suspend fun invoke(filter: Filter){
+            override suspend fun invoke(filter: FindingFilter){
 
                 val filter = filter.toFilter().copy(
                     northEastLon = mapRepository.getNElon(),
                     northEastLat = mapRepository.getNElat(),
                     southWestLon = mapRepository.getSWlon(),
                     southWestLat = mapRepository.getSWlat(),
-                    searchType = SearchType.BOUND.toString()
+                    searchType = SearchType.BOUND
                 )
                 try {
                     findRepository.findThisArea()
@@ -82,21 +84,21 @@ class FindingServiceModule {
         findRepository: FindRepository
     ): SearchByKeywordUseCase {
         return object : SearchByKeywordUseCase {
-            override suspend fun invoke(filter: Filter): List<RestaurantInfo> {
+            override suspend fun invoke(filter: FindingFilter): List<RestaurantInfo> {
 
                 val filter = filter.toFilter().copy(
                     northEastLon = mapRepository.getNElon(),
                     northEastLat = mapRepository.getNElat(),
                     southWestLon = mapRepository.getSWlon(),
                     southWestLat = mapRepository.getSWlat(),
-                    searchType = SearchType.BOUND.toString(),
+                    searchType = SearchType.BOUND,
                     keyword = filter.keyword
                 )
 
                 try {
                     findRepository.search(filter)
                     return apiRestaurant.getFilterRestaurant(
-                        filter = filter
+                        filter = filter.toApiModel()
                     ).map { it.toRestaurantInfo() }
                 } catch (e: HttpException) {
                     throw Exception(e.handle())
@@ -105,7 +107,23 @@ class FindingServiceModule {
             }
         }
     }
+}
 
+fun Filter.toApiModel() : FilterApiModel {
+    return FilterApiModel(
+        searchType = this.searchType.toString(),
+        keyword = this.keyword,
+        distances = this.distances,
+        prices = this.prices,
+        restaurantTypes = this.restaurantTypes,
+        ratings = this.ratings?.toRating(),
+        latitude = this.lat,
+        longitude = this.lon,
+        northEastLat = this.northEastLat,
+        northEastLon = this.northEastLon,
+        southWestLat = this.southWestLat,
+        southWestLon = this.southWestLon
+    )
 }
 
 private fun newLocation(): Location {
