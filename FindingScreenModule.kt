@@ -266,10 +266,12 @@ fun Find1(
                 onFilterPrice        = filterDrawerCallBack.onFilterPrice,
                 onFilterDistance     = filterDrawerCallBack.onFilterDistance,
                 onFilterRating       = filterDrawerCallBack.onFilterRating,
-                onFilterCity         = { filterDrawerCallBack.onFilterCity(it);
-                                         filterCallback.onFilterCity.invoke(it) },
+                onFilterCity         = { filterDrawerCallBack.onFilterCity(it)
+                                         filterCallback.onFilterCity.invoke(it)
+                                         moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)},
                 onFilterNation       = { filterDrawerCallBack.onFilterNation(it)
-                                         filterCallback.onFilterNation.invoke(it) },
+                                         filterCallback.onFilterNation.invoke(it)
+                                         moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)},
                 onQueryChange        = { filterDrawerCallBack.onQueryChange(it) },
                 ),
         )

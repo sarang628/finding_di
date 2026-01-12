@@ -1,7 +1,6 @@
 package com.sarang.torang.di.finding_di
 
 import android.location.Location
-import androidx.compose.runtime.key
 import com.sarang.torang.api.ApiRestaurant
 import com.sarang.torang.api.handle
 import com.sarang.torang.data.Filter
@@ -9,7 +8,6 @@ import com.sarang.torang.data.SearchType
 import com.sarang.torang.data.finding.FindingFilter
 import com.sarang.torang.data.finding.RestaurantInfo
 import com.sarang.torang.data.remote.response.FilterApiModel
-import com.sarang.torang.data.remote.response.RestaurantResponseDto
 import com.sarang.torang.repository.FindRepository
 import com.sarang.torang.repository.MapRepository
 import com.sarang.torang.usecase.FindRestaurantUseCase
