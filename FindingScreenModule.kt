@@ -10,20 +10,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -42,9 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.sarang.torang.ui.FindScreen
-import com.sarang.torang.uistate.FindUiState
-import com.sarang.torang.viewmodel.FindViewModel
 import com.example.screen_map.compose.MapScreenForFinding_
 import com.example.screen_map.viewmodels.MapUIState
 import com.example.screen_map.viewmodels.MapViewModel
@@ -69,8 +60,11 @@ import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
+import com.sarang.torang.ui.FindScreen
 import com.sarang.torang.uistate.FilterCallback
 import com.sarang.torang.uistate.FilterDrawerCallBack
+import com.sarang.torang.uistate.FindUiState
+import com.sarang.torang.viewmodel.FindViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -129,7 +123,7 @@ fun Find(
         onFilterNation       = { filterViewModel.onNation(it)},
         onQueryChange        = { filterViewModel.setQuery(it) }),
         filterCallback       = FilterCallback(
-        onFilter             = { filterViewModel.onFilter()},
+        onFilter             = { filterViewModel.onFilter() },
         onSearch             = { /*onSearch.invoke(uiState)*/ },
         onThisArea           = { filterViewModel.onThisArea() },),
         onMark               = { mapViewModel.onMark(it) },
@@ -147,22 +141,10 @@ fun Find(
     )
 }
 
-class FindState @OptIn(ExperimentalMaterial3Api::class) constructor(
-    val bottomSheetState        : BottomSheetScaffoldState,
-    val selectedRestaurantId    : Int? = null
-)
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun rememberFindState() : FindState {
-    val bottomSheetState    : BottomSheetScaffoldState      = rememberBottomSheetScaffoldState()
-    return FindState(bottomSheetState)
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun Find1(
+fun Find1(
     modifier                : Modifier                      = Modifier,
     findState               : FindState                     = rememberFindState(),
     isGrantedPermission     : Boolean                       = false,
@@ -204,12 +186,15 @@ private fun Find1(
             uiState             = filterUiState,
             visible             = isVisible,
             filterCallback      = FilterCallback(
-            onThisArea          = filterCallback.onThisArea,
-            onFilter            = { filterCallback.onFilter(); coroutineScope.launch { drawerState.open() } },
-            onFilterCity        = { filterCallback.onFilterCity(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-            onFilterNation      = { filterCallback.onFilterNation(it); moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
-            onSearch            = { filterCallback.onSearch.invoke() },
-            onQueryChange       = { filterCallback.onQueryChange(it) },),
+                onThisArea      = filterCallback.onThisArea,
+                onFilter        = { coroutineScope.launch { drawerState.open() } },
+                onFilterCity    = { filterCallback.onFilterCity(it)
+                                    moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                onFilterNation  = { filterCallback.onFilterNation(it)
+                                    moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                onSearch        = { filterCallback.onSearch.invoke() },
+                onQueryChange   = { filterCallback.onQueryChange(it) }
+                                                ),
             topPadding          = topPadding
         )
     }
@@ -275,15 +260,19 @@ private fun Find1(
         FilterMediumDrawer(
             uiState              = filterUiState,
             drawerState          = drawerState,
+            content              = findScreen,
+            onFilter             = filterCallback.onFilter,
             filterDrawerCallBack = FilterDrawerCallBack(
-            onFilterFoodType     = filterDrawerCallBack.onFilterFoodType,
-            onFilterPrice        = filterDrawerCallBack.onFilterPrice,
-            onFilterDistance     = filterDrawerCallBack.onFilterDistance,
-            onFilterRating       = filterDrawerCallBack.onFilterRating,
-            onFilterCity         = { filterDrawerCallBack.onFilterCity(it); filterCallback.onFilterCity.invoke(it) },
-            onFilterNation       = { filterDrawerCallBack.onFilterNation(it); filterCallback.onFilterNation.invoke(it) },
-            onQueryChange        = { filterDrawerCallBack.onQueryChange(it) },),
-            content             = findScreen
+                onFilterFoodType     = filterDrawerCallBack.onFilterFoodType,
+                onFilterPrice        = filterDrawerCallBack.onFilterPrice,
+                onFilterDistance     = filterDrawerCallBack.onFilterDistance,
+                onFilterRating       = filterDrawerCallBack.onFilterRating,
+                onFilterCity         = { filterDrawerCallBack.onFilterCity(it);
+                                         filterCallback.onFilterCity.invoke(it) },
+                onFilterNation       = { filterDrawerCallBack.onFilterNation(it)
+                                         filterCallback.onFilterNation.invoke(it) },
+                onQueryChange        = { filterDrawerCallBack.onQueryChange(it) },
+                ),
         )
     }
 
@@ -310,24 +299,4 @@ private fun Find1(
             )
         }
     }
-}
-
-fun zoomIn(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn(), 300) } }
-fun zoomOut(coroutineScope: CoroutineScope, cameraPositionState: CameraPositionState){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300) } }
-fun moveCamera(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, latitude : Double, longitude : Double, zoom : Float){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom), 1000) } }
-fun moveCamera1(coroutineScope: CoroutineScope,cameraPositionState : CameraPositionState, lat : Double, lon : Double){ coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLng(LatLng(lat, lon)), 300) } }
-
-@Preview
-@Composable
-fun BottomAppBarTest(){
-    Scaffold(
-        bottomBar = {
-            BottomAppBar(     actions = {         IconButton(onClick = { /* doSomething() */ }) {             Icon(Icons. Filled. Menu, contentDescription = "Localized description")         }     } )
-        }
-    ) {
-        Find1(/*Preview*/
-            modifier = Modifier.padding(it),
-        )
-    }
-
 }
