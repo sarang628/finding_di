@@ -261,7 +261,6 @@ fun Find1(
             uiState              = filterUiState,
             drawerState          = drawerState,
             content              = findScreen,
-            onFilter             = filterCallback.onFilter,
             filterDrawerCallBack = FilterDrawerCallBack(
                 onFilterFoodType     = filterDrawerCallBack.onFilterFoodType,
                 onFilterPrice        = filterDrawerCallBack.onFilterPrice,
