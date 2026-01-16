@@ -60,11 +60,11 @@ import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
-import com.sarang.torang.ui.FindScreen
+import com.sarang.torang.compose.finding.FindScreen
 import com.sarang.torang.uistate.FilterCallback
 import com.sarang.torang.uistate.FilterDrawerCallBack
-import com.sarang.torang.uistate.FindUiState
-import com.sarang.torang.viewmodel.FindViewModel
+import com.sarang.torang.compose.finding.FindUiState
+import com.sarang.torang.compose.finding.FindViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
