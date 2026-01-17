@@ -1,6 +1,7 @@
 package com.sarang.torang.di.finding_di
 
 import android.Manifest
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,8 +29,9 @@ import com.sryang.library.compose.workflow.PermissonWorkFlow.SuggestSystemSettin
 import com.sryang.library.compose.workflow.RationaleDialog
 
 @OptIn(ExperimentalPermissionsApi::class)
+@RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
-fun findingWithPermission(
+fun FindScreen(
     viewModel: BestPracticeViewModel = BestPracticeViewModel(),
     permission : String = Manifest.permission.ACCESS_FINE_LOCATION,
     navController : RootNavController = RootNavController(),
@@ -54,9 +56,9 @@ fun findingWithPermission(
     Box {
         Text(state.toString().split("$")[1].split("@")[0])
         Find(navController = navController,
-            isGrantedPermission = state == GrantedPermission,
-            onRequestPermission = {viewModel.request()},
-            findState = findState
+             isGrantedPermission = state == GrantedPermission,
+             onRequestPermission = {viewModel.request()},
+             findState = findState
         )
     }
 }
