@@ -26,7 +26,7 @@ fun BottomAppBarTest(){
             )
         }
     ) {
-        Find1(/*Preview*/
+        IntergratedFind(/*Preview*/
             modifier = Modifier.padding(it),
         )
     }

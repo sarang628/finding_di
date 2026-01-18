@@ -5,14 +5,14 @@ import com.sarang.torang.api.ApiRestaurant
 import com.sarang.torang.api.handle
 import com.sarang.torang.data.Filter
 import com.sarang.torang.data.SearchType
-import com.sarang.torang.data.finding.FindingFilter
-import com.sarang.torang.data.finding.RestaurantInfo
+import com.sarang.torang.data.find.FindFilter
+import com.sarang.torang.data.find.RestaurantInfo
 import com.sarang.torang.data.remote.response.FilterApiModel
 import com.sarang.torang.repository.FindRepository
 import com.sarang.torang.repository.MapRepository
-import com.sarang.torang.usecase.FindRestaurantUseCase
-import com.sarang.torang.usecase.SearchByKeywordUseCase
-import com.sarang.torang.usecase.SearchThisAreaUseCase
+import com.sarang.torang.usecase.find.FindRestaurantUseCase
+import com.sarang.torang.usecase.find.SearchByKeywordUseCase
+import com.sarang.torang.usecase.find.SearchThisAreaUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,11 +22,11 @@ import retrofit2.HttpException
 
 @InstallIn(SingletonComponent::class)
 @Module
-class FindingServiceModule {
+class FindServiceModule {
     @Provides
-    fun provideFindingService(findRepository: FindRepository): FindRestaurantUseCase {
+    fun provideFindService(findRepository: FindRepository): FindRestaurantUseCase {
         return object : FindRestaurantUseCase {
-            override suspend fun filter(filter: FindingFilter) {
+            override suspend fun filter(filter: FindFilter) {
                 try {
                     val filter = Filter(
                         keyword = filter.keyword,
@@ -56,7 +56,7 @@ class FindingServiceModule {
         findRepository: FindRepository
     ): SearchThisAreaUseCase {
         return object : SearchThisAreaUseCase {
-            override suspend fun invoke(filter: FindingFilter){
+            override suspend fun invoke(filter: FindFilter){
 
                 val filter = filter.toFilter().copy(
                     northEastLon = mapRepository.getNElon(),
@@ -82,7 +82,7 @@ class FindingServiceModule {
         findRepository: FindRepository
     ): SearchByKeywordUseCase {
         return object : SearchByKeywordUseCase {
-            override suspend fun invoke(filter: FindingFilter): List<RestaurantInfo> {
+            override suspend fun invoke(filter: FindFilter): List<RestaurantInfo> {
 
                 val filter = filter.toFilter().copy(
                     northEastLon = mapRepository.getNElon(),

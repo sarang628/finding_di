@@ -5,8 +5,8 @@ import com.sarang.torang.BuildConfig
 import com.sarang.torang.compose.FilterUiState
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
 import com.sarang.torang.data.Filter
-import com.sarang.torang.data.finding.FindingFilter
-import com.sarang.torang.data.finding.RestaurantInfo
+import com.sarang.torang.data.find.FindFilter
+import com.sarang.torang.data.find.RestaurantInfo
 import com.sarang.torang.data.remote.response.RatingApiModel
 import com.sarang.torang.data.remote.response.RestaurantResponseDto
 
@@ -22,7 +22,7 @@ fun String.toBoundary(): Double {
     )
 }
 
-fun FindingFilter.toFilter(): Filter {
+fun FindFilter.toFilter(): Filter {
     return Filter(
         restaurantTypes = this.restaurantTypes?.map { it.uppercase() }?.toList(),
         prices = this.prices,

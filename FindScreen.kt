@@ -55,7 +55,7 @@ fun FindScreen(
 
     Box {
         Text(state.toString().split("$")[1].split("@")[0])
-        Find(navController = navController,
+        IntergratedFindScreen(navController = navController,
              isGrantedPermission = state == GrantedPermission,
              onRequestPermission = {viewModel.request()},
              findState = findState

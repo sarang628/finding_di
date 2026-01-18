@@ -59,22 +59,24 @@ import com.sarang.torang.compose.cardinfo.CardInfoViewModel
 import com.sarang.torang.compose.cardinfo.LocalCardInfoImageLoader
 import com.sarang.torang.compose.cardinfo.RestaurantCardPage1
 import com.sarang.torang.compose.cardinfo.RestaurantCardUIState
+import com.sarang.torang.compose.find.Find
+import com.sarang.torang.compose.find.FindUiState
+import com.sarang.torang.compose.find.FindViewModel
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
-import com.sarang.torang.compose.finding.FindScreen
 import com.sarang.torang.uistate.FilterCallback
 import com.sarang.torang.uistate.FilterDrawerCallBack
-import com.sarang.torang.compose.finding.FindUiState
-import com.sarang.torang.compose.finding.FindViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+private const val tag : String = "__Finding"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
-fun Find(
+fun IntergratedFindScreen(
     findState                           : FindState                             = rememberFindState(),
     findViewModel                       : FindViewModel                         = hiltViewModel(),
     filterViewModel                     : FilterViewModel                       = hiltViewModel(),
@@ -85,7 +87,6 @@ fun Find(
     isGrantedPermission                 : Boolean                               = false,
     onRequestPermission                 : () -> Unit                            = {}
 ) {
-    val tag                 : String                        = "__Finding"
     val findUiState         : FindUiState                   = findViewModel.uiState
     val filterUiState       : FilterUiState                 = filterViewModel.uiState
     val cardUiState         : List<RestaurantCardUIState>   = cardInfoViewModel.cardInfos
@@ -102,8 +103,7 @@ fun Find(
         }
     })
 
-    Find1(
-        uiState              = findUiState,
+    IntergratedFind(
         findState            = findState,
         mapUiState           = mapUiState,
         filterUiState        = filterUiState,
@@ -144,7 +144,7 @@ fun Find(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun Find1(
+fun IntergratedFind(
     modifier                : Modifier                      = Modifier,
     findState               : FindState                     = rememberFindState(),
     isGrantedPermission     : Boolean                       = false,
@@ -152,7 +152,6 @@ fun Find1(
     boundary                : Double?                       = null,
     cameraSpeed             : Int                           = 300,
     markerDetailVisibleLevel: Float                         = 18f,
-    uiState                 : FindUiState                   = FindUiState(),
     filterUiState           : FilterUiState                 = FilterUiState(),
     mapUiState              : MapUIState                    = MapUIState(),
     cardUiState             : List<RestaurantCardUIState>   = listOf(),
@@ -170,7 +169,6 @@ fun Find1(
     onMapLoaded             : () -> Unit                    = {},
     onChangePage            : ((Int) -> Unit)               = {},
 ){
-    val tag                 : String                        = "__Finding"
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
     val context             : Context                       = LocalContext.current
     val locationClient      : FusedLocationProviderClient   = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -231,7 +229,7 @@ fun Find1(
     }
 
     val findScreen : @Composable ()->Unit = {
-        FindScreen(
+        Find(
             restaurantCardPage                  = restaurantCardPage ,
             mapScreen                           = mapScreenForFinding,
             onZoomIn                            = { zoomIn(coroutineScope, cameraPositionState) },
