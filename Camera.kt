@@ -18,11 +18,11 @@ fun zoomOut(coroutineScope: CoroutineScope,
         cameraPositionState.animate(CameraUpdateFactory.zoomOut(), 300)
     }
 }
-fun moveCamera(coroutineScope: CoroutineScope,
-               cameraPositionState : CameraPositionState,
-               latitude : Double,
-               longitude : Double,
-               zoom : Float){
+fun moveCamera(coroutineScope       : CoroutineScope,
+               cameraPositionState  : CameraPositionState,
+               latitude             : Double = 0.0,
+               longitude            : Double = 0.0,
+               zoom                 : Float = 0f){
     coroutineScope.launch {
         cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom),
                                     durationMs = 1000) }

@@ -218,12 +218,16 @@ fun IntergratedFind(
     val restaurantCardPage : @Composable ()->Unit = {
         CompositionLocalProvider(LocalCardInfoImageLoader provides customImageLoader) {
             RestaurantCardPage1(
-                restaurants = cardUiState,
-                onClickCard = { navController.restaurant(it) },
-                visible     = isVisible,
-                onPosition  = { lat,lon-> moveCamera(coroutineScope, cameraPositionState, lat, lon, 17f) },
-                onChangePage = { if(isVisible) onChangePage.invoke(it) },
-                focusedRestaurant = cardFocusedRestaurant
+                restaurants         = cardUiState,
+                onClickCard         = { navController.restaurant(it) },
+                visible             = isVisible,
+                onPosition          = { lat,lon-> moveCamera(coroutineScope = coroutineScope,
+                                                             cameraPositionState = cameraPositionState,
+                                                             latitude =  lat,
+                                                             longitude = lon,
+                                                             zoom = 17f) },
+                onChangePage        = { if(isVisible) onChangePage.invoke(it) },
+                focusedRestaurant   = cardFocusedRestaurant
             )
         }
     }
