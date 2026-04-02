@@ -66,6 +66,7 @@ import com.sarang.torang.compose.find.FindViewModel
 import com.sarang.torang.di.restaurant_list_bottom_sheet_di.CustomRestaurantItemImageLoader
 import com.sarang.torang.uistate.FilterCallback
 import com.sarang.torang.uistate.FilterDrawerCallBack
+import com.sryang.library.pullrefresh.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -220,7 +221,9 @@ fun IntergratedFind(
                 restaurants         = cardUiState,
                 onClickCard         = { navController.restaurant(it) },
                 visible             = isVisible,
-                onPosition          = { lat,lon-> moveCamera(coroutineScope = coroutineScope,
+                onPosition          = { lat,lon->
+                    Log.d(tag, "onPosition ${lat}, ${lon}")
+                    moveCamera(coroutineScope = coroutineScope,
                     cameraPositionState = cameraPositionState,
                     latitude =  lat,
                     longitude = lon,
