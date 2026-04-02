@@ -3,7 +3,6 @@ package com.sarang.torang.di.finding_di
 import android.Manifest
 import android.content.Context
 import android.location.Location
-import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
@@ -32,15 +31,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.screen_map.compose.MapScreenForFinding_
-import com.example.screen_map.viewmodels.MapUIState
+import com.example.screen_map.compose.MapForFinding_
+import com.example.screen_map.compose.MapUIState
 import com.example.screen_map.viewmodels.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -202,19 +200,16 @@ fun IntergratedFind(
     }
 
     val mapScreenForFinding : @Composable () -> Unit = {
-        MapScreenForFinding_(
+        MapForFinding_(
             uiState                     = mapUiState,
-            cameraSpeed                 = cameraSpeed,
             onMapClick                  = { isVisible = !isVisible },
             myLocation                  = myLocation,
             boundary                    = boundary,
             logoBottomPadding           = cardPagerHeightDp,
-            markerDetailVisibleLevel    = markerDetailVisibleLevel,
             uiSettings                  = uiSettings,
             onSaveCameraPosition        = onSaveCameraPosition,
             onMark                      = onMark,
             onMapLoaded                 = onMapLoaded,
-            cameraPositionState         = cameraPositionState,
             showLog                     = false
         )
     }
