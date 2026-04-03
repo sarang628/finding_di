@@ -27,12 +27,3 @@ fun moveCamera(coroutineScope       : CoroutineScope,
         cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(latitude, longitude), zoom),
                                     durationMs = 1000) }
 }
-fun moveCamera1(coroutineScope: CoroutineScope,
-                cameraPositionState : CameraPositionState,
-                lat : Double,
-                lon : Double){
-    coroutineScope.launch {
-        cameraPositionState.animate(update = CameraUpdateFactory.newLatLng(LatLng(lat, lon)),
-                                    durationMs = 300)
-    }
-}

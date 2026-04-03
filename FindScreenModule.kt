@@ -139,6 +139,14 @@ fun IntergratedFindScreen(
                     }
                     mapViewModel.onMapLoaded()
             }
+        },
+        onCameraMove = {
+            mapViewModel.setCameraPosition(it)
+            it?.let {
+                coroutineScope.launch {
+                    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(it.first, it.second))
+                }
+            }
         }
     )
 }
@@ -152,15 +160,12 @@ fun IntergratedFind(
     isGrantedPermission     : Boolean                       = false,
     topPadding              : Dp                            = 0.dp,
     boundary                : Double?                       = null,
-    cameraSpeed             : Int                           = 300,
-    markerDetailVisibleLevel: Float                         = 18f,
     filterUiState           : FilterUiState                 = FilterUiState(),
     mapUiState              : MapUIState                    = MapUIState(),
     cardUiState             : List<RestaurantCardUIState>   = listOf(),
     cardFocusedRestaurant   : RestaurantCardUIState?        = null,
     navController           : RootNavController             = RootNavController(),
     cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
-    snackBarHostState       : SnackbarHostState             = remember { SnackbarHostState() },
     uiSettings              : MapUiSettings                 = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
     filterCallback          : FilterCallback                = FilterCallback(),
     filterDrawerCallBack    : FilterDrawerCallBack          = FilterDrawerCallBack(),
@@ -170,6 +175,7 @@ fun IntergratedFind(
     onMark                  : (Int) -> Unit                 = {},
     onMapLoaded             : () -> Unit                    = {},
     onChangePage            : ((Int) -> Unit)               = {},
+    onCameraMove            : (Pair<LatLng, Float>?)-> Unit = {}
 ){
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
     val context             : Context                       = LocalContext.current
@@ -180,7 +186,6 @@ fun IntergratedFind(
     var cardPagerHeight     : Int                           by remember { mutableIntStateOf(0) }
     val cardPagerHeightDp   : Dp                            = with(LocalDensity.current){ cardPagerHeight.toDp() }
     val usePreciseLocation  : Boolean                       = true
-    val density = LocalDensity.current
 
     val filter : @Composable () -> Unit = {
         Filter(
@@ -190,9 +195,9 @@ fun IntergratedFind(
                 onThisArea      = filterCallback.onThisArea,
                 onFilter        = { coroutineScope.launch { drawerState.open() } },
                 onFilterCity    = { filterCallback.onFilterCity(it)
-                                    moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                                    onCameraMove.invoke(Pair(LatLng(it.latitude, it.longitude), it.zoom))},
                 onFilterNation  = { filterCallback.onFilterNation(it)
-                                    moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom) },
+                                    onCameraMove.invoke(Pair(LatLng(it.latitude, it.longitude), it.zoom))},
                 onSearch        = { filterCallback.onSearch.invoke() },
                 onQueryChange   = { filterCallback.onQueryChange(it) }
                                                 ),
@@ -223,11 +228,7 @@ fun IntergratedFind(
                 visible             = isVisible,
                 onPosition          = { lat,lon->
                     Log.d(tag, "onPosition ${lat}, ${lon}")
-                    moveCamera(coroutineScope = coroutineScope,
-                    cameraPositionState = cameraPositionState,
-                    latitude =  lat,
-                    longitude = lon,
-                    zoom = 17f) },
+                    onCameraMove(Pair(LatLng(lat, lon), 17f))},
                 onChangePage        = { if(isVisible) onChangePage.invoke(it) },
                 focusedRestaurant   = cardFocusedRestaurant
             )
@@ -272,10 +273,10 @@ fun IntergratedFind(
                 onFilterRating       = filterDrawerCallBack.onFilterRating,
                 onFilterCity         = { filterDrawerCallBack.onFilterCity(it)
                                          filterCallback.onFilterCity.invoke(it)
-                                         moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)},
+                                         onCameraMove.invoke(Pair(LatLng(it.latitude, it.longitude), it.zoom))},
                 onFilterNation       = { filterDrawerCallBack.onFilterNation(it)
                                          filterCallback.onFilterNation.invoke(it)
-                                         moveCamera(coroutineScope, cameraPositionState, it.latitude, it.longitude, it.zoom)},
+                                         onCameraMove.invoke(Pair(LatLng(it.latitude, it.longitude), it.zoom))},
                 onQueryChange        = { filterDrawerCallBack.onQueryChange(it) },
                 ),
         )
