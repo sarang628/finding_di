@@ -2,8 +2,8 @@ package com.sarang.torang.di.finding_di
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
-import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -36,14 +36,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.screen_map.compose.MapForFinding_
+import com.example.screen_map.compose.MapState
 import com.example.screen_map.compose.MapUIState
+import com.example.screen_map.compose.rememberMapState
 import com.example.screen_map.viewmodels.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.maps.android.compose.CameraPositionState
@@ -72,11 +76,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlin.math.ln
 
 private const val tag : String = "__Finding"
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
 fun IntergratedFindScreen(
     findState                           : FindState                             = rememberFindState(),
@@ -94,7 +98,7 @@ fun IntergratedFindScreen(
     val cardUiState         : List<RestaurantCardUIState>   = cardInfoViewModel.cardInfos
     val mapUiState          : MapUIState                    = mapViewModel.uiState
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
-    val cameraPositionState : CameraPositionState           = rememberCameraPositionState()
+    val mapState            : MapState                      = rememberMapState()
 
     LaunchedEffect(key1 = findUiState.errorMessage, block = { // error snack bar
         if(findUiState.errorMessage.isNotEmpty()){
@@ -111,7 +115,7 @@ fun IntergratedFindScreen(
         filterUiState        = filterUiState,
         cardUiState          = cardUiState,
         cardFocusedRestaurant = cardInfoViewModel.focusedRestaurant,
-        cameraPositionState  = cameraPositionState,
+        mapState             = mapState,
         isGrantedPermission  = isGrantedPermission,
         onRequestPermission  = onRequestPermission,
         navController        = navController,
@@ -134,20 +138,13 @@ fun IntergratedFindScreen(
         onMapLoaded = {
                 if (!mapViewModel.uiState.isMapLoaded) { // 플래그 처리 안하면 지도화면으로 이동할때마다 이벤트 발생 처음에 한번만 동작하면 됨
                     coroutineScope.launch {
-                        cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(mapViewModel.getLastPosition(), mapViewModel.getLastZoom()), durationMs = 1000)
+                        mapState.cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(mapViewModel.getLastPosition(), mapViewModel.getLastZoom()), durationMs = 1000)
                         delay(1000) //카메라 이동 전까지 플래그 비활성화
                     }
                     mapViewModel.onMapLoaded()
             }
         },
-        onCameraMove = {
-            mapViewModel.setCameraPosition(it)
-            it?.let {
-                coroutineScope.launch {
-                    cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(it.first, it.second))
-                }
-            }
-        }
+        onCameraMove = { mapViewModel.setCameraPosition(it) }
     )
 }
 
@@ -165,7 +162,6 @@ fun IntergratedFind(
     cardUiState             : List<RestaurantCardUIState>   = listOf(),
     cardFocusedRestaurant   : RestaurantCardUIState?        = null,
     navController           : RootNavController             = RootNavController(),
-    cameraPositionState     : CameraPositionState           = rememberCameraPositionState(),
     uiSettings              : MapUiSettings                 = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false, compassEnabled = false),
     filterCallback          : FilterCallback                = FilterCallback(),
     filterDrawerCallBack    : FilterDrawerCallBack          = FilterDrawerCallBack(),
@@ -175,7 +171,8 @@ fun IntergratedFind(
     onMark                  : (Int) -> Unit                 = {},
     onMapLoaded             : () -> Unit                    = {},
     onChangePage            : ((Int) -> Unit)               = {},
-    onCameraMove            : (Pair<LatLng, Float>?)-> Unit = {}
+    onCameraMove            : (Pair<LatLng, Float>?)-> Unit = {},
+    mapState                : MapState                      = rememberMapState()
 ){
     val coroutineScope      : CoroutineScope                = rememberCoroutineScope()
     val context             : Context                       = LocalContext.current
@@ -206,18 +203,16 @@ fun IntergratedFind(
     }
 
     val mapScreenForFinding : @Composable () -> Unit = {
-        MapForFinding_(
-            uiState                     = mapUiState,
-            onMapClick                  = { isVisible = !isVisible },
-            myLocation                  = myLocation,
-            boundary                    = boundary,
-            logoBottomPadding           = cardPagerHeightDp,
-            uiSettings                  = uiSettings,
-            onSaveCameraPosition        = onSaveCameraPosition,
-            onMark                      = onMark,
-            onMapLoaded                 = onMapLoaded,
-            showLog                     = false
-        )
+        MapForFinding_(uiState                     = mapUiState,
+                       onMapClick                  = { isVisible = !isVisible },
+                       myLocation                  = myLocation,
+                       boundary                    = boundary,
+                       logoBottomPadding           = cardPagerHeightDp,
+                       uiSettings                  = uiSettings,
+                       onSaveCameraPosition        = onSaveCameraPosition,
+                       onMark                      = onMark,
+                       onMapLoaded                 = onMapLoaded,
+                       mapState                    = mapState)
     }
 
     val restaurantCardPage : @Composable ()->Unit = {
@@ -227,8 +222,8 @@ fun IntergratedFind(
                 onClickCard         = { navController.restaurant(it) },
                 visible             = isVisible,
                 onPosition          = { lat,lon->
-                    Log.d(tag, "onPosition ${lat}, ${lon}")
-                    onCameraMove(Pair(LatLng(lat, lon), 17f))},
+                    onCameraMove(Pair(LatLng(lat, lon), 17f))
+                                      },
                 onChangePage        = { if(isVisible) onChangePage.invoke(it) },
                 focusedRestaurant   = cardFocusedRestaurant
             )
@@ -236,11 +231,12 @@ fun IntergratedFind(
     }
 
     val findScreen : @Composable ()->Unit = {
+        val context = LocalContext.current
         Find(
             restaurantCardPage                  = restaurantCardPage ,
             mapScreen                           = mapScreenForFinding,
-            onZoomIn                            = { zoomIn(coroutineScope, cameraPositionState) },
-            onZoomOut                           = { zoomOut(coroutineScope, cameraPositionState) },
+            onZoomIn                            = { zoomIn(coroutineScope, mapState.cameraPositionState) },
+            onZoomOut                           = { zoomOut(coroutineScope, mapState.cameraPositionState) },
             filter                              = filter,
             onChangeRestaurantCardPageHeight    = { cardPagerHeight = it},
             buttonBottomPadding                 = 0.dp,
@@ -248,11 +244,10 @@ fun IntergratedFind(
                 if(!isGrantedPermission){ onRequestPermission.invoke() }
                 else{
                     coroutineScope.launch(Dispatchers.IO) {
-                        val priority = if (usePreciseLocation) { Priority.PRIORITY_HIGH_ACCURACY } else { Priority.PRIORITY_BALANCED_POWER_ACCURACY }
-                        val result : Location? = locationClient.getCurrentLocation(priority, CancellationTokenSource().token,).await()
-                        result?.let { it ->
+                        val result : Location? = locationClient.getCurrentLocation(context, usePreciseLocation)
+                        result?.let {
                             onCurrentLocation(it)
-                            coroutineScope.launch { cameraPositionState.animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), if (cameraPositionState.position.zoom <= 10.0f) 17.0f else cameraPositionState.position.zoom), if (cameraPositionState.position.zoom <= 10.0f) 2000 else 300) }
+                            coroutineScope.launch { mapState.cameraPositionState.animateMyLocation(it.latitude, it.longitude)}
                             myLocation = LatLng(it.latitude, it.longitude)
                         }
                     }
@@ -306,4 +301,29 @@ fun IntergratedFind(
             )
         }
     }
+}
+
+suspend fun FusedLocationProviderClient.getCurrentLocation(context: Context, usePreciseLocation : Boolean) : Location?{
+
+    if (ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+
+        return null
+    }
+
+    val priority = if (usePreciseLocation) { Priority.PRIORITY_HIGH_ACCURACY } else { Priority.PRIORITY_BALANCED_POWER_ACCURACY }
+    val result : Location? = this.getCurrentLocation(priority, CancellationTokenSource().token,).await()
+    return result
+}
+
+suspend fun CameraPositionState.animateMyLocation(lat : Double, lng : Double){
+    animate(update = CameraUpdateFactory.newLatLngZoom(LatLng(lat, lng),
+        if (position.zoom <= 10.0f) 17.0f else position.zoom),
+        durationMs = if (position.zoom <= 10.0f) 2000 else 300)
 }

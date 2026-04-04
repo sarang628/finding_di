@@ -29,7 +29,6 @@ import com.sryang.library.compose.workflow.PermissonWorkFlow.SuggestSystemSettin
 import com.sryang.library.compose.workflow.RationaleDialog
 
 @OptIn(ExperimentalPermissionsApi::class)
-@RequiresPermission(anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION])
 @Composable
 fun FindScreen(
     viewModel: BestPracticeViewModel = BestPracticeViewModel(),
