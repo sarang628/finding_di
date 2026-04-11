@@ -206,7 +206,6 @@ fun IntergratedFind(
         MapForFinding_(uiState                     = mapUiState,
                        onMapClick                  = { isVisible = !isVisible },
                        myLocation                  = myLocation,
-                       boundary                    = boundary,
                        logoBottomPadding           = cardPagerHeightDp,
                        uiSettings                  = uiSettings,
                        onSaveCameraPosition        = onSaveCameraPosition,
